@@ -2,37 +2,24 @@ import nibabel as nib
 import numpy as np
 import os
 from scipy import ndimage
-from bullseye_plotting import (create_bullseye_plot, prepare_data_bullseye,
-                               read_ls_create_agglo, prepare_data_fromagglo,
-
-                               LABELS_LR, FULL_LABELS)
+from .bullseye_plotting import (create_bullseye_plot, prepare_data_bullseye,
+                                read_ls_create_agglo, prepare_data_fromagglo,
+                                LABELS_LR, FULL_LABELS)
 import matplotlib.pyplot as plt
 import sys
 import getopt
-
-
-def split_filename(file_name):
-    '''
-    Operation on filename to separate path, basename and extension of a filename
-    :param file_name: Filename to treat
-    :return pth, fname, ext:
-    '''
-    pth = os.path.dirname(file_name)
-    fname = os.path.basename(file_name)
-
-    ext = None
-    for special_ext in '.nii', '.nii.gz':
-        ext_len = len(special_ext)
-        if fname[-ext_len:].lower() == special_ext:
-            ext = fname[-ext_len:]
-            fname = fname[:-ext_len] if len(fname) > ext_len else ''
-            break
-    if ext is None:
-        fname, ext = os.path.splitext(fname)
-    return pth, fname, ext
+import argparse
+from nifty_utils.file_utils import split_filename
 
 
 def creation_ls(lobe_file, layer_file, lesion_file):
+    '''
+    Create local summary
+    :param lobe_file: nifti files with lobar separation
+    :param layer_file: nifti file with layer separation
+    :param lesion_file: nifti file with lesion segmentation
+    :return:
+    '''
     lobe_nii = nib.load(lobe_file)
     layer_nii = nib.load(layer_file)
     lesion_nii = nib.load(lesion_file)
@@ -46,18 +33,19 @@ def creation_ls(lobe_file, layer_file, lesion_file):
     vol_bin = []
     vol_reg = []
     connect = []
-    layer = np.where(layer==max_layer, (max_layer-1)*np.ones_like(layer), layer)
+    layer = np.where(layer == max_layer, (max_layer-1)*np.ones_like(layer),
+                     layer)
     [connected, num_connect] = ndimage.measurements.label(lesion)
-    for o in range(0, max_lobe):
-        for l in range(1, max_layer):
-            region_lobe = np.where(lobe == o+1, np.ones_like(lobe),
+    for lobe_index in range(0, max_lobe):
+        for layer_index in range(1, max_layer):
+            region_lobe = np.where(lobe == lobe_index+1, np.ones_like(lobe),
                                    np.zeros_like(lobe))
-            region_layer = np.where(layer==l, np.ones_like(layer),
+            region_layer = np.where(layer == layer_index, np.ones_like(layer),
                                     np.zeros_like(layer))
             region = np.multiply(region_lobe, region_layer)
             lesion_region = np.multiply(region, lesion)
             vol_prob.append(np.sum(lesion_region)*vol_vox)
-            vol_bin.append(np.where(lesion_region>0)[0].shape[0]*vol_vox)
+            vol_bin.append(np.where(lesion_region > 0)[0].shape[0]*vol_vox)
             values = np.unique(connected*lesion_region)
             connect.append(len(values)-1)
             vol_reg.append(np.sum(region)*vol_vox)
@@ -68,93 +56,46 @@ def creation_ls(lobe_file, layer_file, lesion_file):
     return vol_prob, vol_bin, vol_reg, connect
 
 
-def write_ls(vol_prob, vol_bin,vol_reg, connect, filewrite):
+def write_ls(vol_prob, vol_bin, vol_reg, connect, filewrite):
+    '''
+    Write the information of local summary to filewrite
+    :param vol_prob: Probabilistic lesion volumes
+    :param vol_bin: Binary lesion volumes
+    :param vol_reg: Regional volumes
+    :param connect: Information on connected components per region
+    :param filewrite: File to write to
+    :return:
+    '''
     with open(filewrite, 'w') as out_stream:
-        for (vp, vb, vr, c) in zip(vol_prob, vol_bin, vol_reg, connect):
-            out_stream.write(str(vp)+" "+ str(vb)+' '+str(vr)+' '+
-                             str(c)+'\n')
+        for (vprob, vbin, vreg, con) in zip(vol_prob, vol_bin, vol_reg,
+                                            connect):
+            out_stream.write(str(vprob)+" " + str(vbin)+' '+str(vreg)+' ' +
+                             str(con)+'\n')
 
 
 def bullseyes_from_nii(lobe_file, layer_file, lesion_file, filewrite):
+    '''
+    Create bullseye plot from lobar, layer and lesion nii images
+    :param lobe_file: Lobar separation
+    :param layer_file: Layer separation
+    :param lesion_file: Lesion segmentation
+    :param filewrite: File on which to write to
+    :return:
+    '''
     vol_prob, vol_bin, vol_reg, connect = creation_ls(lobe_file, layer_file,
                                                       lesion_file)
     write_ls(vol_prob, vol_bin, vol_reg, connect, filewrite)
-    VPerc, VDist = prepare_data_bullseye(filewrite)
-    be_perc = create_bullseye_plot(VPerc, 'YlOrRd', 0, 0.25)
+    path = os.path.split(lesion_file)[0]
+    name = os.path.split(lesion_file)[1]
+    v_perc, v_dist = prepare_data_bullseye(filewrite)
+    create_bullseye_plot(v_perc, 'YlOrRd', 0, 0.25)
     plt.show()
-    be_dist = create_bullseye_plot(VDist, 'seismic', 0, 0.1)
+    plt.savefig(os.path.join(path, 'BEPerc_' + name.rstrip('.nii.gz') + '.png'))
+    create_bullseye_plot(v_dist, 'seismic', 0, 0.1)
     plt.show()
 
 
-def main(argv):
-    lobe_file = None
-    layer_file = None
-    lesion_file = None
-    filewrite = None
-    pathsave = os.getcwd()
-    num_layers = 4
-    corr_it = False
-    name = ''
 
-    try:
-        opts, args = getopt.getopt(argv, "hl:o:f:s:n:p:nl:ci:", ["lobe=",
-                                                               "layer=",
-                                                               "lesion=",
-                                                       "file=", "name=",
-                                                           "path="])
-    except getopt.GetoptError:
-        print('creation_ls_file.py -l <layer_file> -f <filename_write> -o '
-              '<lobar_file> -s '
-              '<segmentation_file> ')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('creation_ls_file.py -l <layer_file> -f <filename_write> -o '
-              '<lobar_file> -s '
-              '<segmentation_file> ')
-            sys.exit()
-        elif opt in ("-f", "--file"):
-            filewrite = arg
-        elif opt in ("-l", "--layer"):
-            layer_file = arg
-        elif opt in ("-o", "--lobe"):
-            lobe_file = arg
-        elif opt in ("-s", "--lesion"):
-            lesion_file = arg
-        elif opt in ("-nl", "--num_layers"):
-            num_layers = int(arg)
-        elif opt in ("-ci", "--correct_it"):
-            corr_it = arg
-        elif opt in ("-n", "--name"):
-            name = arg
-        elif opt in ("-p", "--path"):
-            pathsave = arg
-    if lobe_file is not None and layer_file is not None and lesion_file is \
-            not None:
-        vol_prob, vol_bin, vol_reg, connect = creation_ls(lobe_file, layer_file,
-                                                      lesion_file)
-        if filewrite is None:
-            [path, basename, ext] = split_filename(lesion_file)
-            filewrite = os.path.join(path, 'LocalSummary_'+basename+'.txt')
-        write_ls(vol_prob, vol_bin, vol_reg, connect, filewrite)
-    if filewrite is not None:
-        les, reg, freq, dist = read_ls_create_agglo(filewrite)
-        freq_full = prepare_data_fromagglo(freq, type_prepa="full")
-        # freq_lr = prepare_data_fromagglo(freq, type="lr")
-        # be_lr = create_bullseye_plot(freq_lr, 'YlOrRd', num_layers=4,
-        #                          num_lobes=5,
-        #                          vmin=0,
-        #                          vmax=1, labels=LABELS_LR, thr=0.1)
-        # plt.show()
-        be_full = create_bullseye_plot(freq_full, 'YlOrRd', num_layers=num_layers,
-                                 num_lobes=9, vmin=0,
-                         vmax=0.25, labels=FULL_LABELS)
-        plt.savefig(os.path.join(pathsave,'BE_'+name+'.png'))
-    print("printednow")
-
-
-if __name__ == "__main__":
-   main(sys.argv[1:])
 
 
 

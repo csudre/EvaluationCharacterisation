@@ -9,6 +9,7 @@ import numpy.ma as ma
 from skimage.morphology import skeletonize_3d as sk3d
 from functools import partial
 from scipy.stats import mstats as mstats
+from .morphology import MorphologyOps
 
 
 class CacheFunctionOutput(object):
@@ -39,92 +40,6 @@ class CacheFunctionOutput(object):
         return value
 
 
-class MorphologyOps(object):
-    """
-    Class that performs the morphological operations needed to get notably
-    connected component. To be used in the evaluation
-    """
-
-    def __init__(self, binary_img, neigh):
-        binary_img_bin = np.where(binary_img > 0, np.ones_like(binary_img),
-                                  np.zeros_like(binary_img))
-        self.binary_map = np.asarray(binary_img_bin, dtype=np.int8)
-        self.neigh = neigh
-        self.structure = self.create_connective_support()
-
-    def create_connective_support(self):
-        connection = 2
-        if self.neigh == 6 or self.neigh > 10:
-            dim = 3
-        else:
-            dim = 2
-        if self.neigh < 8:
-            connection = 1
-        elif self.neigh > 20:
-            connection = 3
-        init = np.ones([3] * dim)
-        results = np.zeros([3] * dim)
-        centre = [1] * dim
-        idx = np.asarray(np.where(init > 0)).T
-        diff_to_centre = idx - np.tile(centre, [idx.shape[0], 1])
-        sum_diff_to_centre = np.sum(np.abs(diff_to_centre), axis=1)
-        idx_chosen = np.asarray(np.where(sum_diff_to_centre <= connection)).T
-        np.put(results, np.squeeze(idx_chosen)[:], 1)
-        # print(np.sum(results))
-        return results
-
-    def skeleton_map(self):
-        skeleton = sk3d(self.binary_map)
-        return skeleton
-
-    def border_map(self):
-        """
-        Creates the border for a 3D image
-        :return:
-        """
-        west = ndimage.shift(self.binary_map, [-1, 0, 0], order=0)
-        east = ndimage.shift(self.binary_map, [1, 0, 0], order=0)
-        north = ndimage.shift(self.binary_map, [0, 1, 0], order=0)
-        south = ndimage.shift(self.binary_map, [0, -1, 0], order=0)
-        top = ndimage.shift(self.binary_map, [0, 0, 1], order=0)
-        bottom = ndimage.shift(self.binary_map, [0, 0, -1], order=0)
-        cumulative = west + east + north + south + top + bottom
-        border = ((cumulative < 6) * self.binary_map) == 1
-        count_neighbour = np.where(np.logical_and(cumulative < 6,
-                                   self.binary_map== 1),
-                                   cumulative, np.zeros_like(cumulative))
-        opp_cumulative = self.oppose(west) + self.oppose(east) + self.oppose(
-            north) + self.oppose(south) + self.oppose(top) + self.oppose(bottom)
-        border_ext = ((opp_cumulative < 6) * self.oppose(self.binary_map))== 1
-        count_neighbour_ext = np.where(np.logical_and(opp_cumulative < 6,
-                                                  self.oppose(
-                                                      self.binary_map) == 1),
-                                   opp_cumulative, np.zeros_like(cumulative))
-
-        return border, count_neighbour, border_ext, count_neighbour_ext
-
-    def foreground_component(self):
-        return ndimage.label(self.binary_map)
-
-    def dilate(self, numb_dil=1):
-        return ndimage.morphology.binary_dilation(self.binary_map,
-                                           structure=self.structure,
-                                           iterations=numb_dil)
-
-    def erode(self, numb_ero=1):
-        return ndimage.morphology.binary_erosion(self.binary_map,
-                                                 self.structure, numb_ero)
-
-    def connect(self):
-        return meas.label(self.binary_map, self.structure)
-
-    @staticmethod
-    def oppose(img):
-        bin_img = np.where(img > 0, np.ones_like(img), np.zeros_like(img))
-        opp_img = 1-bin_img
-        return opp_img
-
-
 class PairwiseMeasures(object):
     def __init__(self, seg_img, ref_img,
                  measures=None, num_neighbors=8, pixdim=[1, 1, 1],
@@ -140,10 +55,10 @@ class PairwiseMeasures(object):
             'vol_diff': (self.vol_diff, 'VolDiff'),
             'ave_dist': (self.measured_average_distance, 'AveDist'),
             'haus_dist': (self.measured_hausdorff_distance, 'HausDist'),
-            'haus_dist95':(self.measured_hausdorff_distance_95, 'HausDist95'),
+            'haus_dist95': (self.measured_hausdorff_distance_95, 'HausDist95'),
             'com_dist': (self.com_dist, 'COM distance'),
-            'com_ref' : (self.com_ref, 'COM red'),
-            'com_seg' : (self.com_seg, 'COM green')
+            'com_ref': (self.com_ref, 'COM red'),
+            'com_seg': (self.com_seg, 'COM green')
         }
         self.seg = seg_img
         self.ref = ref_img
@@ -158,28 +73,28 @@ class PairwiseMeasures(object):
         self.pixdim = pixdim
         self.m_dict_result = {}
 
-    def __FPmap(self):
+    def __fp_map(self):
         """
         This function calculates the false positive map
         :return: FP map
         """
         return np.asarray((self.seg - self.ref) > 0.0, dtype=np.float32)
 
-    def __FNmap(self):
+    def __fn_map(self):
         """
         This function calculates the false negative map
         :return: FN map
         """
         return np.asarray((self.ref - self.seg) > 0.0, dtype=np.float32)
 
-    def __TPmap(self):
+    def __tp_map(self):
         """
         This function calculates the true positive map
         :return: TP map
         """
         return np.asarray((self.ref + self.seg) > 1.0, dtype=np.float32)
 
-    def __TNmap(self):
+    def __tn_map(self):
         """
         This function calculates the true negative map
         :return: TN map
@@ -220,19 +135,19 @@ class PairwiseMeasures(object):
 
     @CacheFunctionOutput
     def fp(self):
-        return np.sum(self.__FPmap())
+        return np.sum(self.__fp_map())
 
     @CacheFunctionOutput
     def fn(self):
-        return np.sum(self.__FNmap())
+        return np.sum(self.__fn_map())
 
     @CacheFunctionOutput
     def tp(self):
-        return np.sum(self.__TPmap())
+        return np.sum(self.__tp_map())
 
     @CacheFunctionOutput
     def tn(self):
-        return np.sum(self.__TNmap())
+        return np.sum(self.__tn_map())
 
     @CacheFunctionOutput
     def n_intersection(self):
@@ -318,11 +233,12 @@ class PairwiseMeasures(object):
         :return: distance_border_ref, distance_border_seg, border_ref,
         border_seg
         """
-        border_ref, _ , _, _= MorphologyOps(self.ref, self.neigh).border_map()
-        border_seg, _, _, _ = MorphologyOps(self.seg, self.neigh).border_map()
-        oppose_ref = 1 - self.ref/np.where(self.ref== 0, np.ones_like(
+        border_ref = MorphologyOps(self.ref, self.neigh).border_map()
+        border_seg = MorphologyOps(self.seg,
+                                   self.neigh).border_map()
+        oppose_ref = 1 - self.ref/np.where(self.ref == 0, np.ones_like(
             self.ref), self.ref)
-        oppose_seg = 1 - self.seg/np.where(self.seg== 0, np.ones_like(
+        oppose_seg = 1 - self.seg/np.where(self.seg == 0, np.ones_like(
             self.seg), self.seg)
         distance_ref = ndimage.distance_transform_edt(oppose_ref)
         distance_seg = ndimage.distance_transform_edt(oppose_seg)
@@ -395,7 +311,7 @@ class PairwiseMeasures(object):
 
     def to_string(self, fmt='{:.4f}'):
         result_str = ""
-        list_space = ['com_ref','com_seg','list_labels']
+        list_space = ['com_ref', 'com_seg', 'list_labels']
         for key in self.measures:
             result = self.m_dict[key][0]()
             if key in list_space:
@@ -408,16 +324,11 @@ class PairwiseMeasures(object):
         return result_str[:-1]  # trim the last comma
 
 
-# # from niftynet.utilities.misc_common import MorphologyOps, CacheFunctionOutput
-# LIST_HARALICK=['asm', 'contrast', 'correlation', 'sumsquare',
-#             'sum_average', 'idifferentmomment', 'sumentropy', 'entropy',
-#             'differencevariance', 'sumvariance', 'differenceentropy',
-#             'imc1', 'imc2']
-
 class RegionProperties(object):
     def __init__(self, seg, img=None, measures=None,
-                 num_neighbors=18, threshold=0, pixdim=[1,1,1]):
-
+                 num_neighbors=18, threshold=0, pixdim=None):
+        if pixdim is None:
+            pixdim = [1, 1, 1]
         self.seg = seg
         self.order = [1, 0, 2]
         self.voxel_size = np.prod(pixdim)
@@ -425,11 +336,10 @@ class RegionProperties(object):
         if img is None:
             self.img = seg
         else:
-            self.img=img
+            self.img = img
         self.img_channels = self.img.shape[4] if self.img.ndim >= 4 else 1
         for i in range(self.img.ndim, 5):
-            self.img = np.expand_dims(self.img,-1)
-        img_id = range(0, self.img_channels)
+            self.img = np.expand_dims(self.img, -1)
         self.bin = bin
         self.threshold = threshold
         if self.seg is not None:
@@ -444,15 +354,15 @@ class RegionProperties(object):
             'centre of mass': (self.centre_of_mass, ['CoMx',
                                                      'CoMy',
                                                      'CoMz']),
-            'centre_abs' : (self.centre_abs, ['Truex, Truey, Truez']),
+            'centre_abs': (self.centre_abs, ['Truex, Truey, Truez']),
             'volume': (self.volume,
-                       ['NVoxels','NVolume']),
+                       ['NVoxels', 'NVolume']),
             'fragmentation': (self.fragmentation, ['Fragmentation']),
             'mean_intensity': (self.mean_int, ['MeanIntensity']),
             'surface': (self.surface, ['NSurface', 'Nfaces_surf',
                                        'NSurf_ext', 'Nfaces_ext']),
-            'surface_dil': (self.surface_dil, ['surf_dil','surf_ero']),
-            'surface volume ratio': (self.sav, ['sav_dil','sav_ero']),
+            'surface_dil': (self.surface_dil, ['surf_dil', 'surf_ero']),
+            'surface volume ratio': (self.sav, ['sav_dil', 'sav_ero']),
             'compactness': (self.compactness, ['CompactNumbDil'
                                                ]),
             'eigen': (self.eigen, ['eigenvalues']),
@@ -461,7 +371,7 @@ class RegionProperties(object):
             'bounds': (self.bounds, ['bounds']),
             'cc': (self.connect_cc, ['N_CC']),
             'cc_dist': (self.dist_cc, ['MeanDistCC']),
-            'cc_size': (self.cc_size, ['MinSize','MaxSize','MeanSize']),
+            'cc_size': (self.cc_size, ['MinSize', 'MaxSize', 'MeanSize']),
             'max_extent': (self.max_extent, ['MaxExtent']),
             'shape_factor': (self.shape_factor, ['ShapeFactor',
                                                  'shapefactor_surfcount']),
@@ -471,8 +381,8 @@ class RegionProperties(object):
         self.m_dict_result = {}
 
     def binarise(self):
-        binary_img = np.where(self.seg > 0, np.ones_like(self.seg), np.zeros_like(
-            self.seg))
+        binary_img = np.where(self.seg > 0, np.ones_like(self.seg),
+                              np.zeros_like(self.seg))
         return binary_img
 
     def __compute_mask(self):
@@ -488,13 +398,13 @@ class RegionProperties(object):
         binarised = self.binarise()
         vol = np.sum(binarised)
         if vol == 0:
-            return 0, 0,0
+            return 0, 0, 0
         radius = (vol * 0.75 * np.pi) ** (1.0/3.0)
         surf_sphere = 4 * np.pi * radius * radius
-        surf_map, count_surf,_,_ = MorphologyOps(binarised, 6).border_map()
-        count_fin = np.where(count_surf > 0, 6-count_surf, count_surf )
+        surf_map, count_surf, _, _ = MorphologyOps(binarised, 6).border_surface_measures()
+        count_fin = np.where(count_surf > 0, 6-count_surf, count_surf)
         count_final_surf = np.sum(count_fin)
-        vol_change = np.pi ** (1/3) * (6*vol) **(2/3)
+        vol_change = np.pi ** (1/3) * (6*vol) ** (2/3)
         return surf_sphere / np.sum(surf_map), surf_sphere / \
             count_final_surf, vol_change/np.sum(surf_map)
 
@@ -519,15 +429,14 @@ class RegionProperties(object):
     def surface(self):
 
         border_seg, count_surf, border_ext, count_surf_ext = MorphologyOps(
-            self.binarise(),
-                                   self.neigh).border_map()
+            self.binarise(), self.neigh, pixdim=self.pixdim).border_surface_measures()
         numb_border_seg = np.sum(border_seg)
         count_surfaces = np.where(count_surf > 0, 6-count_surf, count_surf)
         numb_border_ext = np.sum(border_ext)
         count_surfaces_ext = np.where(count_surf_ext > 0, 6 - count_surf_ext,
                                       count_surf_ext)
         return numb_border_seg, np.sum(count_surfaces), numb_border_ext, \
-               np.sum(count_surfaces_ext)
+            np.sum(count_surfaces_ext)
 
     def surface_dil(self):
         return np.sum(MorphologyOps(self.binarise(), self.neigh).dilate() -
@@ -561,34 +470,35 @@ class RegionProperties(object):
         if self.connect is None:
             self.connect = MorphologyOps(self.binarise(),
                                          self.neigh).connect()[0]
-        return 1- 1.0/np.max(self.connect)
+        return 1 - 1.0/np.max(self.connect)
 
     def dist_cc(self):
         if self.connect is None:
             self.connect = MorphologyOps(self.binarise(),
                                          self.neigh).connect()[0]
-        connected, nf = self.connect, np.max(self.connect)
-        if nf == 1:
+        connected, numb_frac = self.connect, np.max(self.connect)
+        if numb_frac == 1:
             return 0
         else:
             dist_array = []
             size_array = []
-            for l in range(nf):
-                indices_l = np.asarray(np.where(connected==l+1)).T
-                for j in range(l+1,nf):
+            for label in range(numb_frac):
+                indices_l = np.asarray(np.where(connected == label+1)).T
+                for j in range(label+1, numb_frac):
                     indices_j = np.asarray(np.where(connected == j + 1)).T
                     size_array.append(indices_j.shape[0] + indices_l.shape[0])
                     dist_array.append(np.mean(dist.cdist(indices_l,
                                                          indices_j,
-                                                         'wminkowski', p=2,
+                                                         'wminkowski',
+                                                         p= 2,
                                                          w=self.pixdim)))
             return np.sum(np.asarray(dist_array) * np.asarray(size_array) /
                           np.sum(np.asarray(size_array)))
 
     def bounds(self):
-        indices = np.asarray(np.where(self.binarise()== 1)).T
+        indices = np.asarray(np.where(self.binarise() == 1)).T
         if np.sum(self.seg) == 0:
-            return [0,] * self.img.ndim
+            return [0, ] * self.img.ndim
         min_bound = np.min(indices, 0)
         max_bound = np.max(indices, 0)
         return max_bound - min_bound
@@ -603,32 +513,34 @@ class RegionProperties(object):
         mask = 1 - self.binarise()
         data_masked = ma.array(self.img, mask=mask)
         values = mstats.mquantiles(np.reshape(data_masked, [-1]), [0.05, 0.95],
-                          axis=0)
+                                   axis=0)
         return ma.min(data_masked), ma.max(data_masked), values[0], values[1]
 
     def max_extent(self):
-        if np.sum(self.binarise())< 2:
+        if np.sum(self.binarise()) < 2:
             return 0
-        indices = np.asarray(np.where(self.binarise()== 1)).T
+        indices = np.asarray(np.where(self.binarise() == 1)).T
         pdist = dist.pdist(indices, 'wminkowski', p=2, w=self.pixdim)
         return np.max(pdist)
 
     def sav(self):
-        Sdil, Sero = self.surface_dil()
-        V = self.volume()
-        return Sdil / V[0], Sero / V[0]
+        surf_dil, surf_ero = self.surface_dil()
+        vol = self.volume()
+        return surf_dil / vol[0], surf_ero / vol[0]
 
     def compactness(self):
-        Sdil, Sero = self.surface_dil()
-        V= self.volume()
-        return np.power(Sdil, 1.5) / V[0], np.power(Sero, 1.5) / V[0]
+        surf_dil, surf_ero = self.surface_dil()
+        vol = self.volume()
+        return np.power(surf_dil, 1.5) / vol[0], np.power(surf_ero, 1.5) / \
+            vol[0]
 
     def eigen(self):
         idx = np.where(self.seg > 0)
-        try :
-            _, eig_values, _ = svd(np.asarray(idx))
-        except:
-            eig_values = [0,] * len(idx)
+        try:
+            _, eig_values, _ = svd(np.asarray(idx) - np.mean(np.asarray(idx),
+                                                             1))
+        except ValueError:
+            eig_values = [0, ] * len(idx)
         return eig_values
 
     def mean_int(self):
@@ -646,9 +558,9 @@ class RegionProperties(object):
             for j in self.m_dict[i][0]():
                 # print(j)
                 try:
-                    j = (float)(np.nan_to_num(j))
-                    fmt = '{:4f}'
-                except:
+                    j = float(np.nan_to_num(j))
+                    fmt = fmt
+                except ValueError:
                     j = j
                     fmt = '{!s:4s}'
                 try:
@@ -680,6 +592,4 @@ class RegionProperties(object):
                 for d in range(len_res):
                     key_new = key + '_' + str(d)
                     self.m_dict_result[key_new] = result[d]
-
-
 

@@ -6,9 +6,10 @@ import glob
 import os
 from PIL import Image
 import nibabel as nib
-from pairwise_measures_GARS import RegionProperties, PairwiseMeasures
+from evaluation_comparison.pairwise_measures_GARS import RegionProperties, \
+    PairwiseMeasures
 import pandas as pd
-import getopt
+import argparse
 import sys
 FORBIDDEN = ['MOUSE6_HA'] # To Adapt for to skip problematic folders
 
@@ -208,37 +209,49 @@ def main(argv):
     thresh = 64
     pixdim = [0.415, 0.415, 1.750]
     pixdim = [0.38, 0.38, 1.750]
-    try:
-        opts, args = getopt.getopt(argv, "hp:t:pi:", ["path=",
-                                                               "threshold=",
-                                                               "pixdim="])
-    except getopt.GetoptError:
-        print('ProcessingGARS.py -p <path_to_files> -t <threshold> -pi '
-              '<pixdim> ')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('ProcessingGARS.py -p <path_to_files> -t <threshold> -pi '
-              '<pixdim> ')
-            sys.exit()
-        elif opt in ("-p", "--path"):
-            path = arg
-        elif opt in ("-t", "--threshold"):
-            thresh = arg
-        elif opt in ("-pi", "--pixdim"):
-            pixdim = arg
 
-    path_name = glob.glob(path)
+    parser = argparse.ArgumentParser(description='Transform GIF parcellation '
+                                                 'into FS parcellation.')
+
+    parser.add_argument('-p', dest='path', metavar='input_path',
+                                type=str, required=True,
+                                help='path where to find the images')
+    parser.add_argument('-t', dest='threshold', metavar='seg threshold',
+                        type=float, default=64, help='minimum value to '
+                                                     'consider a voxel as '
+                                                     'positive')
+    parser.add_argument('-dx', type=float, dest='pixdim', default=0.48, \
+                                                             help='pixel ' \
+                                                              'dimension in plane')
+    parser.add_argument('-dz', type=float, dest='pixdim_z', help='pixel ' \
+                                                              'dimension out of '
+                                                     'plane', default=1.750)
+
+
+    try :
+        args = parser.parse_args(argv)
+        # print(args.accumulate(args.integers))
+
+    except argparse.ArgumentTypeError:
+        print('BrainHearts.py -f <filename_database> -g <grouping> -d '
+              '<dependent variable> -i <independent variables>')
+        print('The list of independent variables must always start with the '
+              'Age')
+        sys.exit(2)
+
+    pixdim = [args.pixdim, args.pixdim, args.pixdim_z]
+    thresh = args.threshold
+    path_name = glob.glob(args.path)
     for p in path_name:
         dirname = os.path.dirname(p)
         s = os.path.basename(p)
         if s not in FORBIDDEN:
             pj = os.path.join(dirname, s, 'JPEG')
             ps = os.path.join(dirname, s)
-            if not os.path.exists(os.path.join(dirname,s,
-                                  'ExtractedTableFinFilled_'+s+'.csv')) :
+            if not os.path.exists(os.path.join(dirname, s,
+                                  'ExtractedTableFinFilled_'+s+'.csv')):
                 try:
-                    print("Attempting subject %s" %s)
+                    print("Attempting subject %s" % s)
                     process_subject(pj, ps, s, thresh=thresh, pixdim=pixdim)
                     print(s)
                 except ValueError:

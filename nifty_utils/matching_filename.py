@@ -1,6 +1,14 @@
+import os
+from nifty_utils.filename_matching import KeywordsMatching
+import sys
+import csv
+from difflib import SequenceMatcher
+import numpy as np
+
+
 # try to find a direct match between two arrays of list of possible names.
 def match_first_degree(name_list1, name_list2, flag_list=False):
-    '''
+    """
     First immediate matching between two possible name lists (exact equality
     between one item of list1 and of list2
     :param name_list1: First list of names to match
@@ -11,7 +19,7 @@ def match_first_degree(name_list1, name_list2, flag_list=False):
     item of list 1 if exists (-1 otherwise)
     :return ind_match2: Indices of first list that correspond to each given
     item of list 2 if exists (-1) otherwise
-    '''
+    """
     if name_list1 is None or name_list2 is None:
         return None, None, None, None
     init_match1 = [''] * len(name_list1)
@@ -42,19 +50,19 @@ def match_first_degree(name_list1, name_list2, flag_list=False):
                     break
     else:
         print("No flattening")
-        flatten_list1 = list(name_list1)
-        flatten_list2 = list(name_list2)
-        print(name_list1, name_list2)
-        indflat_1 = range(0,len(name_list1))
-        indflat_2 = range(0,len(name_list2))
-        for i in range(0,len(name_list1)):
+        # flatten_list1 = list(name_list1)
+        # flatten_list2 = list(name_list2)
+        # print(name_list1, name_list2)
+        # indflat_1 = range(0,len(name_list1))
+        # indflat_2 = range(0,len(name_list2))
+        for i in range(0, len(name_list1)):
             print(name_list1[i])
             if name_list1[i] in name_list2:
                 init_match1[i] = name_list1[i]
                 print(name_list1[i])
                 ind_match1[i] = name_list2.index(name_list1[i])
 
-        for i in range(0,len(name_list2)):
+        for i in range(0, len(name_list2)):
             if name_list2[i] in name_list1:
                 init_match2[i] = name_list2[i]
                 print(name_list2[i])
@@ -67,7 +75,7 @@ def match_first_degree(name_list1, name_list2, flag_list=False):
 # the matched sequence and the corresponding index of the corresponding
 # element in the list
 def __find_max_overlap_in_list(name, list_names):
-    '''
+    """
     Given a name and list of names to match it to, find the maximum overlap
     existing
     :param name: string to match to any of list_names
@@ -75,7 +83,7 @@ def __find_max_overlap_in_list(name, list_names):
     :return match_seq: matched substring
     :return index: index of element in list_names to which the match is
     associated. Returns -1 if there is no found match
-    '''
+    """
     match_max = 0
     match_seq = ''
     match_orig = ''
@@ -83,7 +91,7 @@ def __find_max_overlap_in_list(name, list_names):
     if len(list_names) == 0:
         return '', -1
     for test in list_names:
-        if len(test)>0:
+        if len(test) > 0:
             match = SequenceMatcher(None, name, test).find_longest_match(
                 0, len(name), 0, len(test))
             if match.size >= match_max and match.size/len(test) >= \
@@ -106,7 +114,7 @@ def __find_max_overlap_in_list(name, list_names):
 # match the remaining ones using the maximum overlap. Returns the name
 # match for each list, and the index correspondences.
 def match_second_degree(name_list1, name_list2):
-    '''
+    """
     More subtle matching with first direct matching and then secondary
     overlap matching between list of list of potential names
     :param name_list1:
@@ -115,7 +123,7 @@ def match_second_degree(name_list1, name_list2):
     :return ind_match1: Index of corresponding match in name_list2
     :return init_match2: Matching string in list2
     :return ind_match2: Index of corresponding match in name_list1
-    '''
+    """
     if name_list1 is None or name_list2 is None:
         return None, None, None, None
     init_match1, init_match2, ind_match1, ind_match2 = match_first_degree(
@@ -148,7 +156,7 @@ def match_second_degree(name_list1, name_list2):
 # From a list of list of names and a list of list of files that are
 # associated, find the name correspondance and therefore the files associations
 def join_subject_id_and_filename_list(name_list, list_files):
-    '''
+    """
     From the list of list of names and the list of list of files
     corresponding to each constraint find the association between a single
     name id and the different file lists
@@ -156,14 +164,15 @@ def join_subject_id_and_filename_list(name_list, list_files):
     :param list_files: list of list of files (one list per constraint)
     :return list_combined: List per subject of name and list of files given
     by the constraints
-    '''
+    """
     ind_max = np.argmax([len(names) for names in name_list])
     name_max = name_list[ind_max]
     name_tot = []
     ind_tot = []
     name_max_to_use = []
     for c in range(0, len(list_files)):
-        name_match, ind_match, _, _ = match_second_degree(name_max, name_list[c])
+        name_match, ind_match, _, _ = match_second_degree(
+            name_max, name_list[c])
         if c == ind_max:
             name_max_to_use = name_match
         name_tot.append(name_match)
@@ -175,18 +184,18 @@ def join_subject_id_and_filename_list(name_list, list_files):
         'To do : Taking care of the case when the list of a constraint is ' \
         'completely empty'
         for c in range(0, len(list_files)):
-            output = list_files[c][ind_tot[c][i]] if ind_tot[c][i]>-1 else ''
+            output = list_files[c][ind_tot[c][i]] if ind_tot[c][i] > -1 else ''
             list_temp.append(output)
         list_combined.append(list_temp)
     return list_combined
 
 
 def remove_duplicated_names(name_list):
-    '''
+    """
     From a list of list of names remove the items that are duplicated
     :param name_list: list of list of names to investigate
     :return duplicates_removed: list of list of names freed of duplicates
-    '''
+    """
     flattened_list = [item for sublist in name_list for item in sublist]
     list_duplicated = [item for item in flattened_list
                        if flattened_list.count(item) > 1]
@@ -198,20 +207,21 @@ def remove_duplicated_names(name_list):
 
 
 def write_matched_filenames_to_csv(list_constraints, csv_file):
-    '''
+    """
     Combine all elements of file searching until finally writing the names
     :param list_constraints: list of constraints (defined by list of paths to
     search, list of elements the filename should contain and of those that
     are forbidden
     :param csv_file: file on which to write the final list of files.
     :return:
-    '''
+    """
     name_tot = []
     list_tot = []
     if list_constraints is None or list_constraints == []:
         return
     for c in list_constraints:
-        list_files, name_list = KeywordsMatching.matching_subjects_and_filenames(c)
+        list_files, name_list = \
+            KeywordsMatching.matching_subjects_and_filenames(c)
         name_list = remove_duplicated_names(name_list)
         name_tot.append(name_list)
         list_tot.append(list_files)

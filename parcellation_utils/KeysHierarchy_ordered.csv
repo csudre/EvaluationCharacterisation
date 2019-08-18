@@ -1,0 +1,153 @@
+﻿Name,Label_Full,1 - Supra/Infra Tentorial,Label_1,2 - CSF/Cortex/BasalGanglia/WM,Label_2,3- L/R,Label_3,34-Lobes,Label_34,4- Lobes,Label_4,5- Sub-Lobes,Label_5,6 - All
+Background,0,0,Background,0,Background,0,Background,0,Background,0,Background,0,Background,1
+Skull 1,1,0,Background,0,Background,0,Background,0,Background,0,Background,0,Background,2
+Skull 2,2,0,Background,0,Background,0,Background,0,Background,0,Background,0,Background,3
+Skull 3,3,0,Background,0,Background,0,Background,0,Background,0,Background,0,Background,4
+External CSF,4,1,Supra Tentorial,1,CSF,1,CSF Medial,1,CSF Medial,1,CSF Medial,1,CSF Medial,5
+3rd Ventricle,5,1,Supra Tentorial,1,CSF,1,CSF Medial,2,CSF Medial,1,CSF Medial,1,CSF Medial,6
+4th Ventricle,12,2,Infra Tentorial,2,CSF-Infra,2,CSF-Infra,2,CSF-Infra,2,CSF-Infra,2,CSF-Infra,8
+5th Ventricle,16,1,Supra Tentorial,1,CSF,1,CSF Medial,2,CSF Medial,1,CSF Medial,1,CSF Medial,7
+Right Accumbens Area,24,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Striatum,3,Striatum Right,3,Telencephalon,9
+Left Accumbens Area,31,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Striatum,4,Striatum Left,4,Telencephalon,10
+Right Amygdala,32,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,20,Medial Temp,11
+Left Amygdala,33,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,39,Medial Temp,12
+Pons,35,2,Infra Tentorial,5,BrainStem+Pons,7,BrainStem+Pons,4,BrainStem+Pons,6,BrainStem+Pons,7,BrainStem+Pons,13
+Brain Stem,36,2,Infra Tentorial,5,BrainStem+Pons,7,BrainStem+Pons,4,BrainStem+Pons,6,BrainStem+Pons,7,BrainStem+Pons,14
+Right Caudate,37,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Striatum,3,Striatum Right,3,Telencephalon,15
+Left Caudate,38,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Striatum,4,Striatum Left,4,Telencephalon,16
+Right Cerebellum Exterior,39,2,Infra Tentorial,6,Cerebellum,8,Cerebellum Right,5,Cerebellum,7,Cerebellum Right,8,Cerebellum Right,17
+Left Cerebellum Exterior,40,2,Infra Tentorial,6,Cerebellum,9,Cerebellum Left,5,Cerebellum,8,Cerebellum Left,9,Cerebellum Left,18
+Right Cerebellum White Matter,41,2,Infra Tentorial,6,Cerebellum,8,Cerebellum Right,5,Cerebellum,7,Cerebellum Right,8,Cerebellum Right,19
+Left Cerebellum White Matter,42,2,Infra Tentorial,6,Cerebellum,9,Cerebellum Left,5,Cerebellum,8,Cerebellum Left,9,Cerebellum Left,20
+Right Hippocampus,48,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,20,Medial Temp,36
+Left Hippocampus,49,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,39,Medial Temp,37
+Right Id Lat Vent,50,1,Supra Tentorial,1,CSF,13,CSF Right,2,CSF,13,CSF Right,5,Right Ventricle,38
+Left Inf Lat Vent,51,1,Supra Tentorial,1,CSF,14,CSF Left,2,CSF ,14,CSF Left,6,Left Ventricle,39
+Right Lateral Ventricle,52,1,Supra Tentorial,1,CSF,13,CSF Right,2,CSF,13,CSF Right,5,Right Ventricle,40
+Left Lateral Ventricle,53,1,Supra Tentorial,1,CSF,14,CSF Left,2,CSF ,14,CSF Left,6,Left Ventricle,41
+Right Pallidum,56,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Basal Ganglia ,3,Striatum Right,22,Diencephalon,42
+Left Pallidum,57,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Basal Ganglia,4,Striatum Left,41,Diencephalon,43
+Right Putamen,58,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Basal Ganglia ,3,Striatum Right,3,Telencephalon,44
+Left Putamen,59,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Basal Ganglia,4,Striatum Left,4,Telencephalon,45
+Right Thalamus Proper,60,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Basal Ganglia ,3,Striatum Right,22,Diencephalon,46
+Left Thalamus Proper,61,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Basal Ganglia,4,Striatum Left,41,Diencephalon,47
+Right Ventral DC,62,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Basal Ganglia ,3,Striatum Right,22,Diencephalon,48
+Left Ventral DC,63,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Basal Ganglia,4,Striatum Left,41,Diencephalon,49
+Cerebellar Vermal Lobules I-V,72,2,Infra Tentorial,6,Cerebellum,15,Cerebellar Vermis,7,Cerebellar Vermis,9,Cerebellar Vermis,53,Cerebellar Vermis,50
+Cerebellar Vermal Lobules VI-VI!,73,2,Infra Tentorial,6,Cerebellum,15,Cerebellar Vermis,7,Cerebellar Vermis,9,Cerebellar Vermis,53,Cerebellar Vermis,51
+Cerebellar Vermal Lobules VIII-X,74,2,Infra Tentorial,6,Cerebellum,15,Cerebellar Vermis,7,Cerebellar Vermis,9,Cerebellar Vermis,53,Cerebellar Vermis,52
+Left Basal Forebrain,76,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Basal Ganglia ,4,Basal Ganglia Left,10,Right Basal Forebrain,53
+Right Basal Forebrain,77,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Basal Ganglia,3,Basal Ganglia Right,11,Left Basal Forebrain,54
+Right Temporal White Matter,81,1,Supra Tentorial,7,WM,10,WM Right,8,WM Temporal,10,WM Right,12,WM Right,21
+Right Insula White Matter,82,1,Supra Tentorial,7,WM,10,WM Right,9,WM Insula,10,WM Right,12,WM Right,22
+Right Cingulate White Matter,83,1,Supra Tentorial,7,WM,10,WM Right,10,WM Cingulate,10,WM Right,12,WM Right,23
+Right Frontal White Matter,84,1,Supra Tentorial,7,WM,10,WM Right,11,WM Frontal,10,WM Right,12,WM Right,24
+Right Occipital White Matter,85,1,Supra Tentorial,7,WM,10,WM Right,12,WM Occipital,10,WM Right,12,WM Right,25
+Right Parietal White Matter,86,1,Supra Tentorial,7,WM,10,WM Right,13,WM Parietal,10,WM Right,12,WM Right,26
+Corpus Callosum,87,1,Supra Tentorial,7,WM,12,WM Mid,14,WM Mid,11,WM Mid,13,WM Mid,27
+Left Temporal White Matter,89,1,Supra Tentorial,7,WM,11,WM Left,8,WM Temporal,12,WM Left,14,WM Left,28
+Left Insula White Matter,90,1,Supra Tentorial,7,WM,11,WM Left,9,WM Insula,12,WM Left,14,WM Left,29
+Left Cingulate White Matter,91,1,Supra Tentorial,7,WM,11,WM Left,10,WM Cingulate,12,WM Left,14,WM Left,30
+Left Frontal White Matter,92,1,Supra Tentorial,7,WM,11,WM Left,11,WM Frontal,12,WM Left,14,WM Left,31
+Left Occipital White Matter,93,1,Supra Tentorial,7,WM,11,WM Left,12,WM Occipital,12,WM Left,14,WM Left,32
+Left Parietal White Matter,94,1,Supra Tentorial,7,WM,11,WM Left,13,WM Parietal,12,WM Left,14,WM Left,33
+Right Claustrum,96,1,Supra Tentorial,3,Basal Ganglia,3,Basal Ganglia Right,3,Basal Ganglia ,3,Striatum Right,22,Diencephalon,34
+Left Claustrum,97,1,Supra Tentorial,3,Basal Ganglia,4,Basal Ganglia Left,3,Basal Ganglia,4,Striatum Left,41,Diencephalon,35
+Right ACgG anterior cingulate gyrus,101,1,Supra Tentorial,4,Cortex,5,Cortex Right,15,Cingulate,19,Right Cingulate,29,Anterior,55
+Left ACgG anterior cingulate gyrus,102,1,Supra Tentorial,4,Cortex,6,Cortex Left,15,Cingulate,25,Left Cingulate,48,Anterior,56
+Right Alns anterior insula,103,1,Supra Tentorial,4,Cortex,5,Cortex Right,17,Insula,20,Right Insula,32,Anterior,57
+Left Alns anterior insula,104,1,Supra Tentorial,4,Cortex,6,Cortex Left,17,Insula,26,Left Insula,51,Anterior,58
+Right AOrG anterior orbital gyrus,105,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,15,Orbitofrontal,59
+Left AOrG anterior orbital gyrus,106,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,34,Orbitofrontal,60
+Right AnG angular gyrus,107,1,Supra Tentorial,4,Cortex,5,Cortex Right,19,Parietal Lobe,17,Right Parietal Lobe,25,Lateral Par,61
+Left AnG angular gyrus,108,1,Supra Tentorial,4,Cortex,6,Cortex Left,19,Parietal Lobe,23,Left Parietal Lobe,44,Lateral Par,62
+Right Calc calcarine cortex,109,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,27,Medial Occ,63
+Left Calc calcarine cortex,110,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,46,Medial Occ,64
+Right CO central operculum,113,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,19,Opercular,65
+Left CO central operculum,114,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,38,Opercular,66
+Right Cun cuneus,115,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,27,Medial Occ,67
+Left Cun cuneus,116,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,46,Medial Occ,68
+Right Ent entorhinal area,117,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,20,Medial Temp,69
+Left Ent entorhinal area,118,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,39,Medial Temp,70
+Right FO frontal operculum,119,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,19,Opercular,71
+Left FO frontal operculum,120,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,38,Opercular,72
+Right FRP frontal pole,121,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,54,Frp,73
+Left FRP frontal pole,122,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,55,Frp,74
+Right FuG fusiform gyrus,123,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,20,Medial Temp,75
+Left FuG fusiform gyrus,124,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,39,Medial Temp,76
+Right GRe gyrus rectus,125,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,17,Vmpfc,77
+Left GRe gyrus rectus,126,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,36,Vmpfc,78
+Right lOG inferior occipital gyrus,129,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,28,Lateral Occ,79
+Left lOG inferior occipital gyrus,130,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,47,Lateral Occ,80
+Right ITG inferior temporal gyrus,133,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,21,Lateral Temp,81
+Left ITG inferior temporal gyrus,134,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,40,Lateral Temp,82
+Right LiG lingual gyrus,135,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,27,Medial Occ,83
+Left LiG lingual gyrus,136,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,46,Medial Occ,84
+Right LOrG lateral orbital gyrus,137,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,15,Orbitofrontal,85
+Left LOrG lateral orbital gyrus,138,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,34,Orbitofrontal,86
+Right MCgG middle cingulate gyrus,139,1,Supra Tentorial,4,Cortex,5,Cortex Right,15,Cingulate,19,Right Cingulate,30,Middle,87
+Left MCgG middle cingulate gyrus,140,1,Supra Tentorial,4,Cortex,6,Cortex Left,15,Cingulate,25,Left Cingulate,49,Middle,88
+Right MFC medial frontal cortex,141,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,17,Vmpfc,89
+Left MFC medial frontal cortex,142,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,36,Vmpfc,90
+Right MFG middle frontal gyrus,143,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,16,Dlpfc,91
+Left MFG middle frontal gyrus,144,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,35,Dlpfc,92
+Right MOG middle occipital gyrus,145,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,28,Lateral Occ,93
+Left MOG middle occipital gyrus,146,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,47,Lateral Occ,94
+Right MOrG medial orbital gyrus,147,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,15,Orbitofrontal,95
+Left MOrG medial orbital gyrus,148,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,34,Orbitofrontal,96
+Right MPoG postcentral gyrus medial segment,149,1,Supra Tentorial,4,Cortex,5,Cortex Right,19,Parietal Lobe,17,Right Parietal Lobe,26,Sensory,97
+Left MPoG postcentral gyrus medial segment,150,1,Supra Tentorial,4,Cortex,6,Cortex Left,19,Parietal Lobe,23,Left Parietal Lobe,45,Sensory,98
+Right MPrG precentral gyrus medial segment,151,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,18,Motor,99
+Left MPrG precentral gyrus medial segment,152,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,37,Motor,100
+Right MSFG superior frontal gyrus medial segment,153,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,17,Vmpfc,101
+Left MSFG superior frontal gyrus medial segment,154,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,36,Vmpfc,102
+Right MTG middle temporal gyrus,155,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,21,Lateral Temp,103
+Left MTG middle temporal gyrus,156,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,40,Lateral Temp,104
+Right OCP occipital pole,157,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,28,Lateral Occ,105
+Left OCP occipital pole,158,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,47,Lateral Occ,106
+Right OFuG occipital fusiform gyrus,161,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,27,Medial Occ,107
+Left OFuG occipital fusiform gyrus,162,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,46,Medial Occ,108
+Right OpIFG opercular part of the inferior frontal gyrus,163,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,16,Dlpfc,109
+Left OpIFG opercular part of the inferior frontal gyrus,164,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,35,Dlpfc,110
+Right OrIFG orbital part of the inferior frontal gyrus,165,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,16,Dlpfc,111
+Left OrIFG orbital part of the inferior frontal gyrus,166,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,35,Dlpfc,112
+Right PCgG posterior cingulate gyrus,167,1,Supra Tentorial,4,Cortex,5,Cortex Right,15,Cingulate,19,Right Cingulate,31,Posterior,113
+Left PCgG posterior cingulate gyrus,168,1,Supra Tentorial,4,Cortex,6,Cortex Left,15,Cingulate,25,Left Cingulate,50,Posterior,114
+Right PCu precuneus,169,1,Supra Tentorial,4,Cortex,5,Cortex Right,19,Parietal Lobe,17,Right Parietal Lobe,24,Medial Par,115
+Left PCu precuneus,170,1,Supra Tentorial,4,Cortex,6,Cortex Left,19,Parietal Lobe,23,Left Parietal Lobe,43,Medial Par,116
+Right PHG parahippocampal gyrus,171,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,20,Medial Temp,117
+Left PHG parahippocampal gyrus,172,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,39,Medial Temp,118
+Right Pins posterior insula,173,1,Supra Tentorial,4,Cortex,5,Cortex Right,17,Insula,20,Right Insula,33,Posterior,119
+Left Pins posterior insula,174,1,Supra Tentorial,4,Cortex,6,Cortex Left,17,Insula,26,Left Insula,52,Posterior,120
+Right PO parietal operculum,175,1,Supra Tentorial,4,Cortex,5,Cortex Right,19,Parietal Lobe,17,Right Parietal Lobe,25,Lateral Par,121
+Left PO parietal operculum,176,1,Supra Tentorial,4,Cortex,6,Cortex Left,19,Parietal Lobe,23,Left Parietal Lobe,44,Lateral Par,122
+Right PoG postcentral gyrus,177,1,Supra Tentorial,4,Cortex,5,Cortex Right,19,Parietal Lobe,17,Right Parietal Lobe,26,Sensory,123
+Left PoG postcentral gyrus,178,1,Supra Tentorial,4,Cortex,6,Cortex Left,19,Parietal Lobe,23,Left Parietal Lobe,45,Sensory,124
+Right POrG posterior orbital gyrus,179,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,15,Orbitofrontal,125
+Left POrG posterior orbital gyrus,180,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,34,Orbitofrontal,126
+Right PP planum polare,181,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,23,Supratemp,127
+Left PP planum polare,182,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,42,Supratemp,128
+Right PrG precentral gyrus,183,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,18,Motor,129
+Left PrG precentral gyrus,184,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,37,Motor,130
+Right PT planum temporale,185,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,23,Supratemp,131
+Left PT planum temporale,186,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,42,Supratemp,132
+Right SCA subcallosal area,187,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,17,Vmpfc,133
+Left SCA subcallosal area,188,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,36,Vmpfc,134
+Right SFG superior frontal gyrus,191,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,16,Dlpfc,135
+Left SFG superior frontal gyrus,192,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,35,Dlpfc,136
+Right SMC supplementary motor cortex,193,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,18,Motor,137
+Left SMC supplementary motor cortex,194,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,37,Motor,138
+Right SMG supramarginal gyrus,195,1,Supra Tentorial,4,Cortex,5,Cortex Right,19,Parietal Lobe,17,Right Parietal Lobe,25,Lateral Par,139
+Left SMG supramarginal gyrus,196,1,Supra Tentorial,4,Cortex,6,Cortex Left,19,Parietal Lobe,23,Left Parietal Lobe,44,Lateral Par,140
+Right SOG superior occipital gyrus,197,1,Supra Tentorial,4,Cortex,5,Cortex Right,20,Occipital Lobe,18,Right Occipital Lobe,28,Lateral Occ,141
+Left SOG superior occipital gyrus,198,1,Supra Tentorial,4,Cortex,6,Cortex Left,20,Occipital Lobe,24,Left Occipital Lobe,47,Lateral Occ,142
+Right SPL superior parietal lobule,199,1,Supra Tentorial,4,Cortex,5,Cortex Right,19,Parietal Lobe,17,Right Parietal Lobe,25,Lateral Par,143
+Left SPL superior parietal lobule,200,1,Supra Tentorial,4,Cortex,6,Cortex Left,19,Parietal Lobe,23,Left Parietal Lobe,44,Lateral Par,144
+Right STG superior temporal gyrus,201,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,21,Lateral Temp,145
+Left STG superior temporal gyrus,202,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,40,Lateral Temp,146
+Right TMP temporal pole,203,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,22,Temporal Pole,147
+Left TMP temporal pole,204,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,41,Temporal Pole,148
+Right TrIFG triangular part of the inferior frontal gyrus,205,1,Supra Tentorial,4,Cortex,5,Cortex Right,18,Frontal Lobe,15,Right Frontal Lobe,16,Dlpfc,149
+Left TrIFG triangular part of the inferior frontal gyrus,206,1,Supra Tentorial,4,Cortex,6,Cortex Left,18,Frontal Lobe,21,Left Frontal Lobe,35,Dlpfc,150
+Right TTG transverse temporal gyrus,207,1,Supra Tentorial,4,Cortex,5,Cortex Right,21,Temporal Lobe,16,Right Temporal Lobe,23,Supratemp,151
+Left TTG transverse temporal gyrus,208,1,Supra Tentorial,4,Cortex,6,Cortex Left,21,Temporal Lobe,22,Left Temporal Lobe,42,Supratemp,152

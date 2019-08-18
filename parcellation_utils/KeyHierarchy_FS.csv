@@ -1,0 +1,114 @@
+Label,GIF,LabelFull,Supra/Infra,CSF/Corte,LR,LobesNoLR,LobesLR,SubLobes
+,0 1 2 3 4,0,Background,Background,,Background,,Background
+Left White matter,67 89 90 91 92 93 94 96,2,Supra Tentorial,WM,WM Left,WM,,WM
+Left Lateral Ventr,53,4,Supra Tentorial,CSF,CSF Left,CSF,,CSF Medial
+Inferior Left Lateral ventricle,51,5,Supra Tentorial,CSF,CSF Left,CSF,,CSF Medial
+Left cerebellar white matter,42,7,Infra Tentorial,Cerebellum,Cerebellum Left,Cerebellum,,Cerebellum
+Left cerebellum Cortex,40,8,Infra Tentorial,Cerebellum,Cerebellum Left,Cerebellum,,Cerebellum
+Left Thalamus Proper,61,10,Supra Tentorial,Basal Ganglia,Basal Ganglia Left,Basal Ganglia,,Diencephalon
+Left Caudate,38,11,Supra Tentorial,Basal Ganglia,Basal Ganglia Left,Basal Ganglia,,Telencephalon
+Left Putamen,59,12,Supra Tentorial,Basal Ganglia,Basal Ganglia Left,Basal Ganglia,,Telencephalon
+Left Pallidum,57,13,Supra Tentorial,Basal Ganglia,Basal Ganglia Left,Basal Ganglia,,Diencephalon
+3rd ventricle,5,14,Supra Tentorial,CSF,CSF Left,CSF,,CSF Medial
+4th Ventricle,12,15,Supra Tentorial,CSF,CSF Left,CSF,,CSF Medial
+Pons Brainstem,35 36,16,Infra Tentorial,Pons+Brainstem,Pons+Brainstem,Pons+Brainstem,,Brainstem+Pons
+Left Hippocampus,49,17,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Medial Temporal
+Left Amygdala,33,18,Supra Tentorial,Basal Ganglia,Basal Ganglia Left,Basal Ganglia,,Medial Temporal
+,47,24,,,,,,
+Left Accumbens,31,26,Supra Tentorial,Basal Ganglia,Basal Ganglia Left,Basal Ganglia,,Telencephalon
+Left Ventral DC,63,28,Supra Tentorial,Basal Ganglia,Basal Ganglia Left,Basal Ganglia,,Diencephalon
+,,30,,,,,,
+,,31,,,,,,
+Right White matter,66 81 82 83 84 85 86 97,41,Supra Tentorial,WM,WM Right,WM,,WM
+,,42,,,,,,
+Right Lateral Ventricle,52,43,Supra Tentorial,CSF,CSF Right,CSF,,CSF Medial
+Right Inferior Lateral Ventricle,50,44,Supra Tentorial,CSF,CSF Right,CSF,,CSF Medial
+Right cerebellar white matter,41,46,Infra Tentorial,Cerebellum,Cerebellum Right,Cerebellum,,Cerebellum
+Right Cerebellum Cortex,39,47,Infra Tentorial,Cerebellum,Cerebellum Right,Cerebellum,,Cerebellum
+Right Thalamus proper,60,49,Supra Tentorial,Basal Ganglia,Basal Ganglia Right,Basal Ganglia,,Diencephalon
+Right Caudate,37,50,Supra Tentorial,Basal Ganglia,Basal Ganglia Right,Basal Ganglia,,Telencephalon
+Right Putamen,58,51,Supra Tentorial,Basal Ganglia,Basal Ganglia Right,Basal Ganglia,,Telencephalon
+Right Pallidum,56,52,Supra Tentorial,Basal Ganglia,Basal Ganglia Right,Basal Ganglia,,Diencephalon
+Right Hippocampus,48,53,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Medial Temporal
+Right Amygdala,32,54,Supra Tentorial,Basal Ganglia,Basal Ganglia Right,Basal Ganglia,,Medial Temporal
+Right Accumbens,24,58,Supra Tentorial,Basal Ganglia,Basal Ganglia Right,Basal Ganglia,,Telencephalon
+Right Ventral DC,62,60,Supra Tentorial,Basal Ganglia,Basal Ganglia Right,Basal Ganglia,,Diencephalon
+,,62,,,,,,
+ChoroidPlexus,,63,Supra Tentorial,CSF,CSF,CSF,,CSF Medial
+,,77,Supra Tentorial,,,,,
+Ventral DC,62 63,85,Supra Tentorial,Basal Ganglia,Basal Ganglia Medial,Basal Ganglia,,Diencephalon
+,87,251,Supra Tentorial,WM,WM Medial,WM,,WM
+,87,252,Supra Tentorial,WM,WM Medial,WM,,WM
+,87,253,Supra Tentorial,WM,WM Medial,WM,,WM
+,87,254,Supra Tentorial,WM,WM Medial,WM,,WM
+,87,255,Supra Tentorial,WM,WM Medial,WM,,WM
+LH Unknown,,1000,Supra Tentorial,Cortex,Cortex Left,,,
+LH Bankssts,,1001,Supra Tentorial,Cortex,Cortex Left,,,
+LH Caudal Anterior Cingulate,140,1002,Supra Tentorial,Cortex,Cortex Left,Cingulate,,Middle
+LH Caudal Middle Frontal,144,1003,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Dlpfc
+LH Cuneus,116,1005,Supra Tentorial,Cortex,Cortex Left,Occipital Lobe,,Medial Occipital
+LH Entorhinal,118,1006,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Medial Temporal
+LH Fusiform,124,1007,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe ,,Medial Temporal
+LH Inferior Parietal,108 146,1008,Supra Tentorial,Cortex,Cortex Left,Parietal Lobe,,Lateral Parietal
+LH Inferior Temporal,134,1009,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Lateral Temporal
+LH Isthmus Cingulate,168,1010,Supra Tentorial,Cortex,Cortex Left,Cingulate,,Posterior
+LH Lateral Occipital,130 158 162,1011,Supra Tentorial,Cortex,Cortex Left,Occipital Lobe,,Lateral Occipital
+LH Orbital gyrus,148 180,1012,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Orbitofrontal
+LH Lingual,136,1013,Supra Tentorial,Cortex,Cortex Left,Occipital Lobe,,Medial Occipital
+LH Medial Orbito Frontal,126 188 142 76,1014,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Vmpfc
+LH Middle Temporal,156,1015,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Lateral Temporal
+LH Parahippocampal,172,1016,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Medial Temporal
+LH Paracentral,150 152,1017,Supra Tentorial,Cortex,Cortex Left,Parietal Lobe,,Sensory
+LH Pars opercularis,164 120,1018,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Opercular
+LH Pars orbitalis,138 106 ,1019,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Orbitofrontal
+LH Pars triangularis,206 166,1020,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Dlpfc
+LH Pericalcarine,110,1021,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Medial Occipital
+LH PostCentral,178,1022,Supra Tentorial,Cortex,Cortex Left,Parietal Lobe,,Sensory
+LH Posterior Cingulate,140,1023,Supra Tentorial,Cortex,Cortex Left,Cingulate,,Middle
+LH Precentral,184,1024,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Motor
+LH Precuneus,170,1025,Supra Tentorial,Cortex,Cortex Left,Parietal Lobe,,Medial Parietal
+LH Rostral Anterior Cingulate,102,1026,Supra Tentorial,Cortex,Cortex Left,Cingulate,,Anterior
+LH Rostral Middle Frontal,144,1027,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Dlpfc
+LH Superior Frontal,192 194 154,1028,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Vmpfc / Motor
+LH Superior Parietal,198 200,1029,Supra Tentorial,Cortex,Cortex Left,Parietal Lobe,,Lateral Parietal
+LH Superior temporal,182 186 202 ,1030,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Supratemp
+LH Supramarginal,196,1031,Supra Tentorial,Cortex,Cortex Left,Parietal Lobe,,Lateral Parietal
+LH Frontal pole,122,1032,Supra Tentorial,Cortex,Cortex Left,Frontal Lobe,,Frontal Pole
+LH temporal pole,204,1033,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Temporal Pole
+LH transverse temporal,208,1034,Supra Tentorial,Cortex,Cortex Left,Temporal Lobe,,Supratemp
+LH Insula,104 114 174 176,1035,Supra Tentorial,Cortex,Cortex Left,Insula,,Posterior
+RH Unknown,,2000,Supra Tentorial,Cortex,Cortex Right,,,
+RH Bankssts,,2001,Supra Tentorial,Cortex,Cortex Right,,,
+RH Caudal Anterior Cingulate,139,2002,Supra Tentorial,Cortex,Cortex Right,Cingulate,,Middle
+RH Caudal Middle Frontal,143,2003,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Dlpfc
+RH Cuneus,115,2005,Supra Tentorial,Cortex,Cortex Right,Occipital Lobe,,Medial Occipital
+RH Entorhinal,117,2006,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Medial Temporal
+RH Fusiform,123,2007,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe ,,Medial Temporal
+RH Inferior Parietal,107 145,2008,Supra Tentorial,Cortex,Cortex Right,Parietal Lobe,,Lateral Parietal
+RH Inferior Temporal,133,2009,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Lateral Temporal
+RH Isthmus Cingulate,167,2010,Supra Tentorial,Cortex,Cortex Right,Cingulate,,Posterior
+RH Lateral Occipital,129 157 161,2011,Supra Tentorial,Cortex,Cortex Right,Occipital Lobe,,Lateral Occipital
+RH Orbital ,147 179,2012,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Orbitofrontal
+RH Lingual,135,2013,Supra Tentorial,Cortex,Cortex Right,Occipital Lobe,,Medial Occipital
+RH Medial Orbito Frontal,125 187 141 77,2014,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Vmpfc
+RH Middle Temporal,155,2015,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Lateral Temporal
+RH Parahippocampal,171,2016,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Medial Temporal
+RH Paracentral,149 151,2017,Supra Tentorial,Cortex,Cortex Right,Parietal Lobe,,Sensory
+RH Pars opercularis,163 119,2018,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Opercular
+RH Pars orbitalis,105 137,2019,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Orbitofrontal
+RH Pars triangularis,205 165,2020,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Dlpfc
+RH Pericalcarine,109,2021,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Medial Occipital
+RH PostCentral,177,2022,Supra Tentorial,Cortex,Cortex Right,Parietal Lobe,,Sensory
+RH Posterior Cingulate,139,2023,Supra Tentorial,Cortex,Cortex Right,Cingulate,,Middle
+RH Precentral,183,2024,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Motor
+RH Precuneus,169,2025,Supra Tentorial,Cortex,Cortex Right,Parietal Lobe,,Medial Parietal
+RH Rostral Anterior Cingulate,101,2026,Supra Tentorial,Cortex,Cortex Right,Cingulate,,Anterior
+RH Rostral Middle Frontal,143,2027,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Dlpfc
+RH Superior Frontal,191 193  153,2028,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Vmpfc / Motor
+RH Superior Parietal,197 199,2029,Supra Tentorial,Cortex,Cortex Right,Parietal Lobe,,Lateral Parietal
+RH Superior temporal,181 185 201,2030,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Supratemp
+RH Supramarginal,195,2031,Supra Tentorial,Cortex,Cortex Right,Parietal Lobe,,Lateral Parietal
+RH Frontal pole,121,2032,Supra Tentorial,Cortex,Cortex Right,Frontal Lobe,,Frontal Pole
+RH temporal pole,203,2033,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Temporal Pole
+RH transverse temporal,207,2034,Supra Tentorial,Cortex,Cortex Right,Temporal Lobe,,Supratemp
+RH Insula,103  113 173 175,2035,Supra Tentorial,Cortex,Cortex Right,Insula,,Posterior

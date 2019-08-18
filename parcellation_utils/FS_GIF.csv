@@ -1,0 +1,114 @@
+Label,GIF,FS
+,0 1 2 3 4,0
+Left White matter,67 89 90 91 92 93 94 96,2
+Left Lateral Ventr,53,4
+Inferior Left Lateral ventricle,51,5
+Left cerebellar white matter,42,7
+Left cerebellum Cortex,40,8
+Left Thalamus Proper,61,10
+Left Caudate,38,11
+Left Putamen,59,12
+Left Pallidum,57,13
+3rd ventricle,5,14
+4th Ventricle,12,15
+Pons Brainstem,35 36,16
+Left Hippocampus,49,17
+Left Amygdala,33,18
+,47,24
+Left Accumbens,31,26
+Left Ventral DC,63,28
+,,30
+,,31
+Right White matter,66 81 82 83 84 85 86 97,41
+,,42
+Right Lateral Ventricle,52,43
+Right Inferior Lateral Ventricle,50,44
+Right cerebellar white matter,41,46
+Right Cerebellum Cortex,39,47
+Right Thalamus proper,60,49
+Right Caudate,37,50
+Right Putamen,58,51
+Right Pallidum,56,52
+Right Hippocampus,48,53
+Right Amygdala,32,54
+Right Accumbens,24,58
+Right Ventral DC,62,60
+,,62
+ChoroidPlexus,,63
+,,77
+Ventral DC,62 63,85
+,87,251
+,87,252
+,87,253
+,87,254
+,87,255
+LH Unknown,,1000
+LH Bankssts,,1001
+LH Caudal Anterior Cingulate,140,1002
+LH Caudal Middle Frontal,144,1003
+LH Cuneus,116,1005
+LH Entorhinal,118,1006
+LH Fusiform,124,1007
+LH Inferior Parietal,108 146,1008
+LH Inferior Temporal,134,1009
+LH Isthmus Cingulate,168,1010
+LH Lateral Occipital,130 158 162,1011
+,148 180,1012
+LH Lingual,136,1013
+LH Medial Orbito Frontal,126 188 142 76,1014
+LH Middle Temporal,156,1015
+LH Parahippocampal,172,1016
+LH Paracentral,150 152,1017
+LH Pars opercularis,164 120,1018
+LH Pars orbitalis,138 106 ,1019
+LH Pars triangularis,206 166,1020
+LH Pericalcarine,110,1021
+LH PostCentral,178,1022
+LH Posterior Cingulate,140,1023
+LH Precentral,184,1024
+LH Precuneus,170,1025
+LH Rostral Anterior Cingulate,102,1026
+LH Rostral Middle Frontal,144,1027
+LH Superior Frontal,192 194 154,1028
+LH Superior Parietal,198 200,1029
+LH Superior temporal,182 186 202 ,1030
+LH Supramarginal,196,1031
+LH Frontal pole,122,1032
+LH temporal pole,204,1033
+LH transverse temporal,208,1034
+LH Insula,104 114 174 176,1035
+RH Unknown,,2000
+RH Bankssts,,2001
+RH Caudal Anterior Cingulate,139,2002
+RH Caudal Middle Frontal,143,2003
+RH Cuneus,115,2005
+RH Entorhinal,117,2006
+RH Fusiform,123,2007
+RH Inferior Parietal,107 145,2008
+RH Inferior Temporal,133,2009
+RH Isthmus Cingulate,167,2010
+RH Lateral Occipital,129 157 161,2011
+,147 179,2012
+RH Lingual,135,2013
+RH Medial Orbito Frontal,125 187 141 77,2014
+RH Middle Temporal,155,2015
+RH Parahippocampal,171,2016
+RH Paracentral,149 151,2017
+RH Pars opercularis,163 119,2018
+RH Pars orbitalis,105 137,2019
+RH Pars triangularis,205 165,2020
+RH Pericalcarine,109,2021
+RH PostCentral,177,2022
+RH Posterior Cingulate,139,2023
+RH Precentral,183,2024
+RH Precuneus,169,2025
+RH Rostral Anterior Cingulate,101,2026
+RH Rostral Middle Frontal,143,2027
+RH Superior Frontal,191 193  153,2028
+RH Superior Parietal,197 199,2029
+RH Superior temporal,181 185 201,2030
+RH Supramarginal,195,2031
+RH Frontal pole,121,2032
+RH temporal pole,203,2033
+RH transverse temporal,207,2034
+RH Insula,103  113 173 175,2035
