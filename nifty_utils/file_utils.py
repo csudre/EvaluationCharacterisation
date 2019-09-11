@@ -81,12 +81,17 @@ def reorder_list_presuf(list_seg, list_ref):
     new_ref = list(list_ref)
     pre_seg, suf_seg = find_prefix_suffix(list_seg)
     pre_ref, suf_ref = find_prefix_suffix(list_ref)
+
     for s in range(0, len(new_seg)):
-        new_seg[s] = new_seg[s].replace(pre_seg, '')
-        new_seg[s] = new_seg[s].replace(suf_seg, '')
+        if pre_seg is not None:
+            new_seg[s] = new_seg[s].replace(pre_seg, '')
+        if suf_seg is not None:
+            new_seg[s] = new_seg[s].replace(suf_seg, '')
     for r in range(0, len(new_ref)):
-        new_ref[r] = new_ref[r].replace(pre_ref, '')
-        new_ref[r] = new_ref[r].replace(suf_ref, '')
+        if pre_ref is not None:
+            new_ref[r] = new_ref[r].replace(pre_ref, '')
+        if suf_ref is not None:
+            new_ref[r] = new_ref[r].replace(suf_ref, '')
     print(new_ref, new_seg)
     _, _, ind_s, ind_r = match_first_degree(new_seg, new_ref)
     print(ind_s, ind_r)

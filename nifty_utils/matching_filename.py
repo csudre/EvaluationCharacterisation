@@ -20,6 +20,9 @@ def match_first_degree(name_list1, name_list2, flag_list=False):
     :return ind_match2: Indices of first list that correspond to each given
     item of list 2 if exists (-1) otherwise
     """
+    if len(name_list1)==1 and len(name_list2)==1:
+        print("Unique matching to try")
+        return [''], [''], [0], [0]
     if name_list1 is None or name_list2 is None:
         return None, None, None, None
     init_match1 = [''] * len(name_list1)

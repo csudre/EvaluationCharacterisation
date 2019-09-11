@@ -1,6 +1,8 @@
 import logging
 import nibabel as nib
 import numpy as np
+import os
+from .file_utils import split_filename
 
 CHOICES = ['LAS', 'LAI', 'LPS', 'LPI', 'LSA', 'LSP', 'LIA', 'LIP',
            'RAS', 'RAI', 'RPS', 'RPI', 'RSA', 'RSP', 'RIA', 'RIP',
@@ -140,6 +142,15 @@ def do_reorientation(nii_image, init_axcodes, final_axcodes):
         logger.error('reorientation undecided %s, %s', ornt_init, ornt_fin)
 
 
+def save_sform(file):
+    nii_img = nib.load(file)
+    sform = nii_img.get_sform()
+    [p, name, ext] = split_filename(file)
+    name_save = os.path.join(p, name + '_sform.txt')
+    print(sform)
+    np.savetxt(name_save, sform)
+
+
 def flirt_affine_to_nr(ref_file, flo_file, flirt_aff):
     """
     Transform a flirt affine matrix of transformation into the niftyreg
@@ -183,6 +194,34 @@ def flirt_affine_to_nr(ref_file, flo_file, flirt_aff):
     nr_aff = np.matmul(mat, inv_ref)
     print(nr_aff)
     return nr_aff
+
+def four_to_five(file):
+    nii_img = nib.load(file)
+    data = nii_img.get_data()
+    affine = nii_img.affine
+    if data.ndim < 5:
+        while(data.ndim<5):
+            data = np.expand_dims(data, -1)
+    if data.shape[3] > data.shape[4]:
+        new_data = np.swapaxes(data, 3, 4)
+    else:
+        new_data = data
+    nii_new = nib.Nifti1Image(new_data, affine)
+    return nii_new
+
+def five_to_four(file):
+    nii_img = nib.load(file)
+    data = nii_img.get_data()
+    affine = nii_img.affine
+    if data.ndim < 5:
+        while(data.ndim<5):
+            data = np.expand_dims(data, -1)
+    if data.shape[3] < data.shape[4]:
+        new_data = np.swapaxes(data, 3, 4)
+    else:
+        new_data = data
+    nii_new = nib.Nifti1Image(new_data, affine)
+    return nii_new
 
 
 def nr_affine_to_flirt(ref_file, flo_file, nr_aff):

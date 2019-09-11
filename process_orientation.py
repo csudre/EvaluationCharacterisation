@@ -6,7 +6,7 @@ import numpy as np
 import nibabel as nib
 from nifty_utils.orientation import nr_affine_to_flirt, flirt_affine_to_nr, \
     do_reorientation, check_coronal, check_axial, check_anisotropy, \
-    check_sagittal
+    check_sagittal, four_to_five, five_to_four, save_sform
 CHOICES = ['LAS', 'LAI', 'LPS', 'LPI', 'LSA', 'LSP', 'LIA', 'LIP',
            'RAS', 'RAI', 'RPS', 'RPI', 'RSA', 'RSP', 'RIA', 'RIP',
            'SRP', 'SRA', 'SLP', 'SLA', 'SPR', 'SPL', 'SAR', 'SAL',
@@ -51,6 +51,24 @@ def main(argv):
                              required=True)
     parser_reor.add_argument('-f', dest='file', required=True)
     parser_reor.add_argument('-o', dest='output_name', action='store', type=str,
+                             help='filename where to store transformed data',
+                             default=None)
+
+    parser_4to5 = subparsers.add_parser('4to5')
+    parser_4to5.add_argument('-f', dest='file', required=True)
+    parser_4to5.add_argument('-o', dest='output_name', action='store', type=str,
+                             help='filename where to store transformed data',
+                             default=None)
+
+    parser_5to4 = subparsers.add_parser('5to4')
+    parser_5to4.add_argument('-f', dest='file', required=True)
+    parser_5to4.add_argument('-o', dest='output_name', action='store', type=str,
+                             help='filename where to store transformed data',
+                             default=None)
+
+    parser_5to4 = subparsers.add_parser('sform')
+    parser_5to4.add_argument('-f', dest='file', required=True)
+    parser_5to4.add_argument('-o', dest='output_name', action='store', type=str,
                              help='filename where to store transformed data',
                              default=None)
 
@@ -100,6 +118,25 @@ def main(argv):
                 name_save = args.output_name
             np.savetxt(name_save, transfo)
             return
+
+    if args.subcommand == '5to4':
+        new_nii = five_to_four(args.file)
+        if args.output_name is None:
+            name_save = args.file.rstrip('.nii.gz')+'_5to4.nii.gz'
+        else:
+            name_save = args.output_name
+        nib.save(new_nii, name_save)
+
+    if args.subcommand == '4to5':
+        new_nii = four_to_five(args.file)
+        if args.output_name is None:
+            name_save = args.file.rstrip('.nii.gz')+'_4to5.nii.gz'
+        else:
+            name_save = args.output_name
+        nib.save(new_nii, name_save)
+
+    if args.subcommand == 'sform':
+        save_sform(args.file)
 
     if args.subcommand == 'reor':
         file_nii = nib.load(args.file)
