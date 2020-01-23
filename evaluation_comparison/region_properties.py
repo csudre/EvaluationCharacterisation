@@ -3,29 +3,48 @@ from __future__ import absolute_import, print_function, division
 import numpy as np
 import numpy.ma as ma
 import math
+import pylab as pl
 import scipy.stats.mstats as mstats
 import scipy.ndimage as ndimage
+from skimage.morphology import convex_hull_image as chi
+from scipy.spatial import ConvexHull as CH
+from scipy.spatial import Delaunay as DL
+import scipy.ndimage.morphology as morph
 from .morphology import MorphologyOps
+from .pairwise_measures import CacheFunctionOutput
 # from niftynet.utilities.misc_common import MorphologyOps, CacheFunctionOutput
 LIST_HARALICK = ['asm', 'contrast', 'correlation', 'sumsquare',
                  'sum_average', 'idifferentmomment', 'sumentropy', 'entropy',
                  'differencevariance', 'sumvariance', 'differenceentropy',
                  'imc1', 'imc2']
+LIST_SHAPE = ['centre of mass', 'volume', 'surface', 'ratio_eigen', 'fa',
+              'solidity', 'compactness', 'contour_smoothness', 'circularity',
+              'balance', 'eigen_values', 'max_dist_com', 'fractal_dim']
+LIST_HIST = ['weighted_mean', 'weighted_std', 'median', 'skewness',
+             'kurtosis', 'wquantile_1', 'wquantile_5', 'wquantile_25',
+             'wquantile_50', 'wquantile_75', 'wquantile_95', 'wquantile_99']
 
 
 class RegionProperties(object):
     def __init__(self, seg, img, measures,
                  num_neighbors=6, threshold=0, pixdim=None, bin_numb=100,
-                 bin_glszm=32, mul=10, trans=50):
+                 bin_glszm=32, mul=10, trans=50, lab_channels=None):
         if pixdim is None:
             pixdim = [1, 1, 1]
         self.seg = seg
+        self.bin_seg = np.where(self.seg>0, np.ones_like(self.seg),
+                                np.zeros_like(self.seg))
         self.bin = bin_numb
         self.bin_glszm = bin_glszm
         self.mul = mul  # 10 for Norm 5 for Z 50 for Stacked
         self.trans = trans  # 50 for all
+        if img.ndim == 3:
+            img = np.expand_dims(np.expand_dims(img, -1), -1)
+        if img.ndim == 4:
+            img = np.expand_dims(img, 3)
         self.img = img
         self.measures = measures
+        self.m_dict_result = {}
 
         self.pixdim = pixdim
         self.threshold = threshold
@@ -33,11 +52,22 @@ class RegionProperties(object):
             self.haralick_flag = True
         else:
             self.haralick_flag = False
-        print("Harilick flag", self.haralick_flag)
+        #print("Harilick flag", self.haralick_flag)
 
         self.vol_vox = np.prod(pixdim)
-        self.img_channels = self.img.shape[4] if img.ndim >= 4 else 1
-        img_id = range(0, self.img_channels)
+        self.img_channels = self.img.shape[4] if img.ndim == 5 else 1
+        img_id_init = range(0, self.img_channels)
+        img_id = []
+        if lab_channels is not None:
+            img_id = [l for (i, l) in enumerate(lab_channels) if i <
+                      self.img_channels]
+            if len(lab_channels) < self.img_channels:
+                for id in range(0, self.img_channels - len(lab_channels)):
+                    img_id.append(str(len(lab_channels)+id))
+        else:
+            for l in img_id_init:
+                img_id.append(str(l))
+        self.img_id = img_id
         if self.seg is not None:
             self.masked_img, self.masked_seg = self.__compute_mask()
         else:
@@ -53,6 +83,7 @@ class RegionProperties(object):
                                                      'CoMz']),
             'volume': (self.volume,
                        ['NVoxels', 'NVoxelsBinary', 'Vol', 'VolBinary']),
+            'max_dist_com': (self.max_dist_com, ['MaxDistCoM']),
             'surface': (self.surface, ['NSurface',
                                        'NSurfaceBinary',
                                        'SurfaceVol',
@@ -65,73 +96,108 @@ class RegionProperties(object):
                                                'CompactNumbBinary',
                                                'Compactness',
                                                'CompactnessBinary']),
-            'mean': (self.mean_, ['Mean_%d' % i for i in img_id]),
+            'solidity': (self.solidity, ['Solidity']),
+            'balance': (self.balanced_rep, ['Balance']),
+            'fractal_dim': (self.fractal_dimension, ['Fractal_dim']),
+            'circularity': (self.circularity, ['Circularity']),
+            'contour_smoothness': (self.contour_smoothness, ['Contour_Smooth']),
+            'eigen_values': (self.ellipsoid_lambdas, ['lambda_%i' % i for i
+                                                      in range(0,3)]),
+            'ratio_eigen': (self.ratio_eigen, ['ratio_eigen_%i' % i for i in
+                                               range(0,3)]),
+            'fa': (self.fractional_anisotropy, ['FA']),
+            'mean': (self.mean_, ['Mean_%s' % i for i in img_id]),
             'weighted_mean': (self.weighted_mean_,
-                              ['Weighted_mean_%d' % i for i in img_id]),
-            'median': (self.median_, ['Median_%d' % i for i in img_id]),
-            'skewness': (self.skewness_, ['Skewness_%d' % i for i in img_id]),
-            'kurtosis': (self.kurtosis_, ['Kurtosis_%d' % i for i in img_id]),
+                              ['Weighted_mean_%s' % i for i in img_id]),
+            'weighted_std': (self.weighted_std_, ['Weighted_std_%s' % i for i
+                                                  in img_id]),
+            'median': (self.median_, ['Median_%s' % i for i in img_id]),
+            'skewness': (self.skewness_, ['Skewness_%s' % i for i in img_id]),
+            'kurtosis': (self.kurtosis_, ['Kurtosis_%s' % i for i in img_id]),
             'min': (self.min_ if np.sum(self.seg) > 0 else
-                    self.return_0, ['Min_%d' % i for i in img_id]),
+                    self.return_0, ['Min_%s' % i for i in img_id]),
             'max': (self.max_ if np.sum(self.seg) > 0 else
-                    self.return_0, ['Max_%d' % i for i in img_id]),
+                    self.return_0, ['Max_%s' % i for i in img_id]),
             'quantile_1': (self.quantile_1 if np.sum(self.seg) > 0 else
-                           self.return_0, ['P1_%d' % i for i in img_id]),
+                           self.return_0, ['P1_%s' % i for i in img_id]),
             'quantile_5': (self.quantile_5 if np.sum(self.seg) > 0 else
-                           self.return_0, ['P5_%d' % i for i in img_id]),
+                           self.return_0, ['P5_%s' % i for i in img_id]),
             'quantile_25': (self.quantile_25 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P25_%d' % i for i in img_id]),
+                            self.return_0, ['P25_%s' % i for i in img_id]),
             'quantile_50': (self.median_ if np.sum(self.seg) > 0 else
-                            self.return_0, ['P50_%d' % i for i in img_id]),
+                            self.return_0, ['P50_%s' % i for i in img_id]),
             'quantile_75': (self.quantile_75 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P75_%d' % i for i in img_id]),
+                            self.return_0, ['P75_%s' % i for i in img_id]),
             'quantile_95': (self.quantile_95 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P95_%d' % i for i in img_id]),
+                            self.return_0, ['P95_%s' % i for i in img_id]),
             'quantile_99': (self.quantile_99 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P99_%d' % i for i in img_id]),
+                            self.return_0, ['P99_%s' % i for i in img_id]),
+
+            'wquantile_1': (self.weighted_quantile_1 if np.sum(self.seg) > 0
+                            else
+                           self.return_0, ['P1_%s' % i for i in img_id]),
+            'wquantile_5': (self.weighted_quantile_5 if np.sum(self.seg) > 0
+                            else
+                           self.return_0, ['P5_%s' % i for i in img_id]),
+            'wquantile_25': (self.weighted_quantile_25 if np.sum(self.seg) >
+                                                          0 else
+                            self.return_0, ['P25_%s' % i for i in img_id]),
+            'wquantile_50': (self.weighted_quantile_50 if np.sum(self.seg) > 0
+                            else
+                            self.return_0, ['P50_%s' % i for i in img_id]),
+            'wquantile_75': (self.weighted_quantile_75 if np.sum(self.seg) >
+                                                          0 else
+                            self.return_0, ['P75_%s' % i for i in img_id]),
+            'wquantile_95': (self.weighted_quantile_95 if np.sum(self.seg) >
+                                                          0 else
+                            self.return_0, ['P95_%s' % i for i in img_id]),
+            'wquantile_99': (self.weighted_quantile_99 if np.sum(self.seg) >
+                                                          0 else
+                            self.return_0, ['P99_%s' % i for i in img_id]),
+
             'std': (self.std_ if np.sum(self.seg) > 0 else self.return_0,
-                    ['STD_%d' % i for i in img_id]),
+                    ['STD_%s' % i for i in img_id]),
             'asm': (self.call_asm if np.sum(self.seg) > 0 else self.return_0,
-                    ['asm%d' % i for i in img_id]),
+                    ['asm%s' % i for i in img_id]),
 
             'contrast': (self.call_contrast if np.sum(self.seg) > 0 and
                          self.haralick_flag else self.return_0,
-                         ['contrast%d' % i for i in img_id]),
+                         ['contrast%s' % i for i in img_id]),
             'correlation': (self.call_correlation if np.sum(self.seg) > 0 and
                             self.haralick_flag else self.return_0,
-                            ['correlation%d' % i for i in img_id]),
+                            ['correlation%s' % i for i in img_id]),
             'sumsquare': (self.call_sum_square if np.sum(self.seg) > 0 and
                           self.haralick_flag else self.return_0,
-                          ['sumsquare%d' % i for i in img_id]),
+                          ['sumsquare%s' % i for i in img_id]),
             'sum_average': (self.call_sum_average if np.sum(self.seg) > 0 and
                             self.haralick_flag else self.return_0,
-                            ['sum_average%d' % i for i in img_id]),
+                            ['sum_average%s' % i for i in img_id]),
             'idifferentmomment': (self.call_idifferent_moment if np.sum(
                 self.seg) > 0 and self.haralick_flag else self.return_0,
-                                  ['idifferentmomment%d' % i for i in img_id]),
+                                  ['idifferentmomment%s' % i for i in img_id]),
             'sumentropy': (self.call_sum_entropy if np.sum(self.seg) > 0 and
                            self.haralick_flag else self.return_0,
-                           ['sumentropy%d' % i for i in img_id]),
+                           ['sumentropy%s' % i for i in img_id]),
             'entropy': (self.call_entropy if np.sum(self.seg) > 0 and
                         self.haralick_flag else self.return_0,
-                        ['entropy%d' % i for i in img_id]),
+                        ['entropy%s' % i for i in img_id]),
             'differencevariance': (self.call_difference_variance if
                                    np.sum(self.seg) > 0 and
                                    self.haralick_flag else self.return_0,
-                                   ['differencevariance%d' % i for i in
+                                   ['differencevariance%s' % i for i in
                                     img_id]),
             'differenceentropy': (self.call_difference_entropy if
                                   np.sum(self.seg) > 0 and self.haralick_flag
                                   else self.return_0,
-                                  ['differenceentropy%d' % i for i in img_id]),
+                                  ['differenceentropy%s' % i for i in img_id]),
             'sumvariance': (self.call_sum_variance if np.sum(self.seg) > 0 and
                             self.haralick_flag else self.return_0,
-                            ['sumvariance%d' % i for i in img_id]),
+                            ['sumvariance%s' % i for i in img_id]),
             'imc1': (self.call_imc1 if np.sum(self.seg) > 0 and
-                     self.haralick_flag else self.return_0, ['imc1%d' % i for
+                     self.haralick_flag else self.return_0, ['imc1%s' % i for
                                                              i in img_id]),
             'imc2': (self.call_imc2 if np.sum(self.seg) > 0 and
-                     self.haralick_flag else self.return_0, ['imc2%d' % i for
+                     self.haralick_flag else self.return_0, ['imc2%s' % i for
                                                              i in img_id])
 
         }
@@ -147,6 +213,179 @@ class RegionProperties(object):
 
     def centre_of_mass(self):
         return np.mean(np.argwhere(self.seg > self.threshold), 0)
+
+    def fractal_dimension(self):
+
+        scales = np.logspace(0.05, 5, num=10, endpoint=False, base=2)
+        #print(scales)
+        offset_res = []
+        for x_pad in range(0, 6):
+            for y_pad in range(0, 6):
+                for z_pad in range(0, 6):
+                    seg_pad = np.pad(self.bin_seg, ((x_pad, x_pad), (y_pad,
+                                                                    y_pad),
+                                     (z_pad, z_pad)), mode='constant')
+                    Ns_temp = RegionProperties.count_boxes_multiscales(seg_pad)
+                    #print(x_pad, y_pad, z_pad)
+                    offset_res.append(np.expand_dims(Ns_temp, 1))
+        final_concat = np.concatenate(offset_res, 1)
+        min_boxes = np.min(final_concat, 1)
+        # linear fit, polynomial of degree 1
+        coeffs = np.polyfit(np.log(scales), np.log(min_boxes), 1)
+        print("The Hausdorff dimension is", -coeffs[0])
+        # the fractal dimension is the OPPOSITE of the fitting coefficient
+        return -1 * coeffs[0]
+
+    def get_xyz_minmax(self):
+        bord = RegionProperties.border_fromero(self.bin_seg)
+        list_ind = np.asarray(np.where(bord > 0)).T
+        min_ind = np.min(list_ind, 0)
+        max_ind = np.max(list_ind, 0)
+        return min_ind, max_ind
+
+    @CacheFunctionOutput
+    def convexhull_fromles(self):
+        border_periv = RegionProperties.border_fromero(self.bin_seg)
+        indices = np.asarray(np.where(border_periv)).T
+        out_idx = indices
+        if indices.shape[0] > 4:
+            try:
+                test_chi = CH(indices)
+                deln = DL(test_chi.points[test_chi.vertices])
+                idx = np.stack(np.indices(self.bin_seg.shape), axis=-1)
+                out_idx = np.asarray(np.nonzero(deln.find_simplex(idx) + 1)).T
+            except:
+                out_idx = indices
+        else:
+            out_idx = indices
+        max_shape = np.tile(np.expand_dims(np.asarray(border_periv.shape)-1,
+                                           0), [np.asarray(out_idx).shape[0],1])
+        out_idx = np.minimum(np.asarray(out_idx), max_shape)
+        print(np.max(out_idx, 0))
+        chi_temp = np.zeros(self.bin_seg.shape)
+        chi_temp[out_idx] = 1
+        return chi_temp
+
+    def circularity(self):
+        bord_les = RegionProperties.border_fromero(self.bin_seg)
+        return 4 * np.pi * np.sum(self.seg) / np.square(np.sum(bord_les))
+
+    def solidity(self):
+        ch_les = self.convexhull_fromles()
+        return np.sum(self.bin_seg) / np.sum(ch_les)
+
+    def contour_smoothness(self):
+        ch_les = self.convexhull_fromles()
+        border_les = RegionProperties.border_fromero(self.bin_seg)
+        border_ch = RegionProperties.border_fromero(ch_les)
+        return np.sum(border_ch) / np.sum(border_les)
+
+    def balanced_rep(self):
+        list_ind = np.asarray(np.where(self.bin_seg>0)).T
+        std_ind = np.std(list_ind, 0)
+        return np.sqrt(np.min(std_ind)/np.max(std_ind))
+
+    @CacheFunctionOutput
+    def ellipsoid_lambdas(self):
+        idx = np.asarray(np.where(self.bin_seg>0)).T
+        centre_of_mass = np.mean(idx, axis=0)
+
+        idx_centred = idx - np.expand_dims(centre_of_mass,0)
+        cov_idx = np.matmul(idx_centred.T, idx_centred)
+        det = np.linalg.det(cov_idx)
+        if det < 0.001:
+            cov_idx += 0.00001 * np.eye(cov_idx.shape[0])
+
+        u, s, v = np.linalg.svd(cov_idx)
+        return np.sqrt(s)
+
+    def ratio_eigen(self):
+        s = self.ellipsoid_lambdas()
+        return s[0]/s[1], s[0]/s[2], s[1]/s[2]
+
+    def fractional_anisotropy(self):
+        s = self.ellipsoid_lambdas()
+        mean_eig = np.mean(s)
+        fa = np.sqrt( np.sum(np.square(s-mean_eig)))/ np.sqrt(np.sum(
+            np.square(s)))
+        return np.sqrt(3.0/2.0) * fa
+
+    @CacheFunctionOutput
+    def weighted_quantile(self,
+                          values_sorted=False, old_style=False):
+        """ Very close to numpy.percentile, but supports weights.
+        NOTE: quantiles should be in [0, 1]!
+        :param values: numpy.array with data
+        :param quantiles: array-like with many quantiles needed
+        :param sample_weight: array-like of the same length as `array`
+        :param values_sorted: bool, if True, then will avoid sorting of
+            initial array
+        :param old_style: if True, will correct output to be consistent
+            with numpy.percentile.
+        :return: numpy.array with computed quantiles.
+        """
+        list_weights = []
+        list_values = []
+        for m in range(0, self.img.shape[-1]):
+            values = np.reshape(self.img[...,m], [-1])
+            sample_weight = np.reshape(self.seg, [-1])
+            ind = np.where(sample_weight > 0)
+            values = values[ind]
+            sample_weight = sample_weight[ind]
+
+            if not values_sorted:
+                sorter = np.argsort(values)
+                values = values[sorter]
+                sample_weight = sample_weight[sorter]
+
+            weighted_quantiles = np.cumsum(sample_weight) - 0.5 * sample_weight
+            if old_style:
+                # To be convenient with numpy.percentile
+                weighted_quantiles -= weighted_quantiles[0]
+                weighted_quantiles /= weighted_quantiles[-1]
+            else:
+                weighted_quantiles /= np.sum(sample_weight)
+            list_weights.append(weighted_quantiles)
+            list_values.append(values)
+        return list_weights, list_values
+
+    def weighted_quantile_1(self):
+        w = self.weighted_quantile()[0]
+        v = self.weighted_quantile()[1]
+        return [np.interp([0.01], w, v)[0] for (w, v) in zip(
+            self.weighted_quantile()[0], self.weighted_quantile()[1])]
+
+    def weighted_quantile_5(self):
+        return [np.interp([0.05], w, v)[0] for (w, v) in zip(
+            self.weighted_quantile()[0], self.weighted_quantile()[1])]
+
+    def weighted_quantile_25(self):
+        return [np.interp([0.25], w, v)[0] for (w, v) in zip(
+            self.weighted_quantile()[0], self.weighted_quantile()[1])]
+
+    def weighted_quantile_50(self):
+        return [np.interp([0.5], w, v)[0] for (w, v) in zip(
+            self.weighted_quantile()[0], self.weighted_quantile()[1])]
+
+    def weighted_quantile_75(self):
+        return [np.interp([0.75], w, v)[0] for (w, v) in zip(
+            self.weighted_quantile()[0], self.weighted_quantile()[1])]
+
+    def weighted_quantile_95(self):
+        return [np.interp([0.95], w, v)[0] for (w, v) in zip(
+            self.weighted_quantile()[0], self.weighted_quantile()[1])]
+
+    def weighted_quantile_99(self):
+        return [np.interp([0.99], w, v)[0] for (w, v) in zip(
+            self.weighted_quantile()[0], self.weighted_quantile()[1])]
+
+    def max_dist_com(self):
+        border = RegionProperties.border_fromero(self.bin_seg)
+        indices_border = np.asarray(np.where(border)).T
+        com = self.centre_of_mass()
+        dist_com = np.sum(np.square(indices_border - com) * np.square(self.pixdim))
+        return np.sqrt(np.max(dist_com))
+
 
     # def grey_level_size_matrix(self):
 
@@ -326,6 +565,34 @@ class RegionProperties(object):
         :return:
         """
         return self.harilick_m[12, :]
+
+    def fill_value(self):
+        for key in self.m_dict:
+            if key in self.measures:
+                # print(key)
+                result = self.m_dict[key][0]()
+                # print(key, result)
+                if np.sum(self.seg) == 0:
+                    if not isinstance(result, (list, tuple, set, np.ndarray)):
+                        result = float(result)
+                    else:
+                        result = map(float, result)
+
+                if not isinstance(result, (list, tuple, set, np.ndarray)):
+                    self.m_dict_result[key] = result
+                else:
+                    if isinstance(result, np.ndarray):
+                        len_res = result.shape[0]
+                    else:
+                        len_res = len(result)
+                    if len_res == len(self.img_id):
+                        for (res, imgid) in zip(result, self.img_id):
+                            key_new = key + '_' + imgid
+                            self.m_dict_result[key_new] = res
+                    else:
+                        for d in range(len_res):
+                            key_new = key + '_' + str(d)
+                            self.m_dict_result[key_new] = result[d]
 
     @staticmethod
     def harilick(matrix):
@@ -554,7 +821,7 @@ class RegionProperties(object):
         if hxy == 0:
             ic_2 = 0
         else:
-            ic_2 = math.sqrt(1-math.exp(-2*(hxy_2-hxy)))
+            ic_2 = math.sqrt(1-math.exp(-2*np.abs((hxy_2-hxy))))
         return ic_1, ic_2
 
     @staticmethod
@@ -572,6 +839,37 @@ class RegionProperties(object):
             for j in range(0, matrix.shape[0]):
                 ssv += (i-mean) ** 2 * matrix[i, j]
         return ssv
+
+    @staticmethod
+    def border_fromero(maples):
+        bord = maples - morph.binary_erosion(maples)
+        print(np.sum(bord))
+        return bord
+
+    @staticmethod
+    def count_boxes_multiscales(seg):
+        indices = np.where(seg > 0)
+
+        Lx = seg.shape[0]
+        Ly = seg.shape[1]
+        Lz = seg.shape[2]
+
+        #print(Lx, Ly, Lz)
+        pixels = np.asarray(indices).T
+        #print(pixels.shape)
+
+        # computing the fractal dimension
+        # considering only scales in a logarithmic list
+        scales = np.logspace(0.5, 5, num=10, endpoint=False, base=2)
+        Ns = []
+        # looping over several scales
+        for scale in scales:
+            # computing the histogram
+            H, edges = np.histogramdd(indices, bins=(np.arange(0, Lx, scale),
+                                                     np.arange(0, Ly, scale),
+                                                     np.arange(0, Lz, scale)))
+            Ns.append(np.sum(H > 0))
+        return Ns
 
     def return_0(self):
         """
@@ -623,6 +921,17 @@ class RegionProperties(object):
         """
         masked_seg = np.tile(self.masked_seg, [self.img_channels, 1]).T
         return ma.average(self.masked_img, axis=0, weights=masked_seg).flatten()
+
+    def weighted_std_(self):
+        """
+        Return mean over probabilistic mask
+        :return:
+        """
+        masked_seg = np.tile(self.masked_seg, [self.img_channels, 1]).T
+        squared_img = self.masked_img * self.masked_img
+        return ma.average(
+            squared_img, axis=0, weights=masked_seg).flatten() - np.square(ma.average(self.masked_img, axis=0,
+                           weights=masked_seg).flatten())
 
     def mean_(self):
         """
@@ -727,8 +1036,24 @@ class RegionProperties(object):
         result_str = ""
         for i in self.measures:
             print(i, self.m_dict[i])
-            for j in self.m_dict[i][0]():
-                print(j)
+            result = self.m_dict[i][0]()
+            if isinstance(result, (list, tuple, np.ndarray)):
+                for j in self.m_dict[i][0]():
+                    print(j)
+                    try:
+                        j = float(np.nan_to_num(j))
+                        fmt = fmt
+                    except ValueError:
+                        j = j
+                        fmt = '{!s:4s}'
+                    try:
+
+                        result_str += ',' + fmt.format(j)
+                    except ValueError:  # some functions give strings e.g., "--"
+                        print(i, j)
+                        result_str += ',{}'.format(j)
+            else:
+                j = result
                 try:
                     j = float(np.nan_to_num(j))
                     fmt = fmt

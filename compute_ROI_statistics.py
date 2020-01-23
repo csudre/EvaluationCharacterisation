@@ -27,6 +27,13 @@ MEASURES_SIMPLE = ('centre of mass', 'volume', 'surface', 'surface volume ratio'
             'kurtosis', 'min', 'max', 'std', 'quantile_1',
             'quantile_5', 'quantile_25', 'quantile_50',
             'quantile_75', 'quantile_95','quantile_99')
+
+MEASURES_SHAPE = ('centre of mass', 'volume', 'surface', 'surface volume '
+                                                         'ratio',
+                  'compactness', 'solidity', 'balance', 'fractal_dim',
+                  'circularity', 'contour_smoothness', 'eigen_values',
+                  'ratio_eigen', 'fa')
+
 OUTPUT_FORMAT = '{:4f}'
 OUTPUT_FILE_PREFIX = 'ROIStatistics'
 OUTPUT_FIG_PREFIX = 'CumHist'
@@ -90,7 +97,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Create csv file with'
                                                  ' region properties')
     parser.add_argument('-i', dest='input_image', metavar='input pattern',
-                        type=str, required=True,
+                        type=str,
                         help='RegExp pattern for the input files')
     parser.add_argument('-m', dest='mask_image', action='store',
                         default='', type=str,
@@ -117,6 +124,8 @@ def main(argv):
                         'intensities')
     parser.add_argument('-trans', dest='trans', action='store', type=float,
                         default=None, help='offset value for the intensities')
+    parser.add_argument('-name', dest='name', default='',
+                        action='store',  type=str, help='name for filename')
 
     try:
         args = parser.parse_args(argv)
@@ -133,6 +142,8 @@ def main(argv):
     masks = glob.glob(args.mask_image)
     print(images, masks)
     pth, name, ext = split_filename(images[0])
+    if not args.name == '':
+        name = args.name
     out_name = '{}_{}.csv'.format(
         OUTPUT_FILE_PREFIX,
         name)
@@ -163,6 +174,8 @@ def main(argv):
         argmeasures = MEASURES_SIMPLE
     if len(args.measures) == 1 and args.measures[0] == 'full':
         argmeasures = MEASURES
+    if len(args.measures) == 1 and args.measures[0] == 'shape':
+        argmeasures = MEASURES_SHAPE
     if len(args.measures) > 1:
         argmeasures = args.measures
     header_str = RegionProperties(img, img_2, argmeasures).header_str()
@@ -170,7 +183,30 @@ def main(argv):
     if args.analysis != 'binary':
         fixed_fields = 'Mask,Image,Label'
     out_stream.write(fixed_fields + header_str + '\n')
-    if args.type == 'paired':
+
+    if args.analysis == 'cc' and args.measures[0] == 'shape':
+        mask_names_init = glob.glob(args.mask_image)
+        for mask_file in mask_names_init:
+            mask = nib.load(mask_file).get_data()
+            cc_map = measure.label(mask, connectivity=args.neighborhood,
+                               background=0)
+            values_label = np.unique(cc_map)
+            values_label = [v for v in values_label if v > 0]
+            for val in values_label:
+                mask_label = np.where(cc_map == val, np.ones_like(mask),
+                                  np.zeros_like(mask))
+
+                roi_stats, n, bins = extract_region_properties(
+                    mask, mask_label, threshold=args.threshold,
+                 mul=args.mul, measures=argmeasures,
+                    trans=args.trans, type='image')
+
+                fixed_fields = '{},{},{}'.format(mask_file, mask_file, val)
+
+                out_stream.write(fixed_fields + roi_stats.to_string(
+                    OUTPUT_FORMAT) + '\n')
+
+    elif args.type == 'paired':
         # inputs
         img_names_init = glob.glob(args.input_image)
         mask_names_init = glob.glob(args.mask_image)

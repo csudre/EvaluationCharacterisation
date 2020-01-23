@@ -146,6 +146,16 @@ def run_compare(param):
                 voxel_sizes = seg_nii.header.get_zooms()[0:3]
                 seg = np.squeeze(seg_nii.get_data())
                 ref = ref_nii.get_data()
+                if not seg.shape == ref.shape:
+                    print("Issue of shape for comparison of %s and %s" %(
+                        seg_name, ref_name))
+                    continue
+                if not np.all(seg) >= 0:
+                    print("negatives in %s" %seg_name)
+                    continue
+                if not np.all(ref) >= 0:
+                    print("negatives in %s" %ref_name)
+                    continue
                 assert (np.all(seg) >= 0)
                 assert (np.all(ref) >= 0)
                 assert (seg.shape == ref.shape)

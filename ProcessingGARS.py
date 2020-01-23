@@ -210,8 +210,7 @@ def main(argv):
     pixdim = [0.415, 0.415, 1.750]
     pixdim = [0.38, 0.38, 1.750]
 
-    parser = argparse.ArgumentParser(description='Transform GIF parcellation '
-                                                 'into FS parcellation.')
+    parser = argparse.ArgumentParser(description='Process Mouse images')
 
     parser.add_argument('-p', dest='path', metavar='input_path',
                                 type=str, required=True,

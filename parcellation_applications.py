@@ -150,7 +150,7 @@ def main(argv):
                     tiv = 0
                     for col in list_keys_columns:
                         if '6_' in col and col not in ('6_0', '6_1', '6_2',
-                                                       '6_3'):
+                                                       '6_3','6_4'):
                             tiv += float(dict_fin[col])
                         dict_total[col].append(dict_fin[col])
                     dict_total['TIV'].append(tiv)
@@ -170,7 +170,8 @@ def main(argv):
                 dict_total['ID'].append(name)
                 tiv = 0
                 for col in list_keys_columns:
-                    if '6_' in col and col not in ('6_0', '6_1', '6_2', '6_3'):
+                    if '6_' in col and col not in ('6_0', '6_1', '6_2',
+                                                   '6_3','6_4'):
                         tiv += float(dict_fin[col])
                     dict_total[col].append(dict_fin[col])
                 dict_total['TIV'].append(tiv)

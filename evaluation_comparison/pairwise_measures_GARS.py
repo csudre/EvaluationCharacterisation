@@ -470,7 +470,7 @@ class RegionProperties(object):
         if self.connect is None:
             self.connect = MorphologyOps(self.binarise(),
                                          self.neigh).connect()[0]
-        return 1 - 1.0/np.max(self.connect)
+        return 1 - 1.0/(np.max(self.connect)+0.000001)
 
     def dist_cc(self):
         if self.connect is None:
