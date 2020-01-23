@@ -215,7 +215,8 @@ class RegionProperties(object):
         return np.mean(np.argwhere(self.seg > self.threshold), 0)
 
     def fractal_dimension(self):
-
+        if np.sum(self.seg) < 6:
+            return 0
         scales = np.logspace(0.05, 5, num=10, endpoint=False, base=2)
         #print(scales)
         offset_res = []
@@ -263,7 +264,7 @@ class RegionProperties(object):
         out_idx = np.minimum(np.asarray(out_idx), max_shape)
         print(np.max(out_idx, 0))
         chi_temp = np.zeros(self.bin_seg.shape)
-        chi_temp[out_idx] = 1
+        chi_temp[list(out_idx.T)] = 1
         return chi_temp
 
     def circularity(self):
