@@ -7,6 +7,7 @@ import glob
 import numpy as np
 import argparse
 from skimage import measure
+from scipy.ndimage import label
 from evaluation_comparison.region_properties import RegionProperties
 from evaluation_comparison.morphology import MorphologyOps
 import nibabel as nib
@@ -144,6 +145,8 @@ def main(argv):
     pth, name, ext = split_filename(images[0])
     if not args.name == '':
         name = args.name
+        if not args.threshold == 0.5:
+            name = args.name +'_' +str(args.threshold)
     out_name = '{}_{}.csv'.format(
         OUTPUT_FILE_PREFIX,
         name)
@@ -187,9 +190,17 @@ def main(argv):
     if args.analysis == 'cc' and args.measures[0] == 'shape':
         mask_names_init = glob.glob(args.mask_image)
         for mask_file in mask_names_init:
-            mask = nib.load(mask_file).get_data()
+            mask_nii = nib.load(mask_file)
+            mask = mask_nii.get_data()
+            mask = (mask>args.threshold)
             cc_map = measure.label(mask, connectivity=args.neighborhood,
                                background=0)
+            cc_map, n_lab = label(mask)
+
+            nii_cc = nib.Nifti1Image(cc_map.astype(int), mask_nii.affine)
+            nib.save(nii_cc, os.path.join(pth,
+                                          'CC_'+args.name+'_'+str(
+                                              args.threshold)+'.nii.gz'))
             values_label = np.unique(cc_map)
             values_label = [v for v in values_label if v > 0]
             for val in values_label:

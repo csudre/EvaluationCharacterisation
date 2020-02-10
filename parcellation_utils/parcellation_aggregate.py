@@ -71,11 +71,11 @@ def prepare_use_gif_hierarchy():
     choices_level_6 = list(set(gif_h['Label_Full']))
 
     dict_1 = {c: 'Label_1' for c in choices_level_1}
-    dict_2 = {c: 'Label_1' for c in choices_level_2}
-    dict_3 = {c: 'Label_1' for c in choices_level_3}
-    dict_34 = {c: 'Label_1' for c in choices_level_34}
-    dict_4 = {c: 'Label_1' for c in choices_level_4}
-    dict_5 = {c: 'Label_1' for c in choices_level_5}
+    dict_2 = {c: 'Label_2' for c in choices_level_2}
+    dict_3 = {c: 'Label_3' for c in choices_level_3}
+    dict_34 = {c: 'Label_34' for c in choices_level_34}
+    dict_4 = {c: 'Label_4' for c in choices_level_4}
+    dict_5 = {c: 'Label_5' for c in choices_level_5}
     dict_6 = {c: 'Label_6' for c in choices_level_6}
 
     dict_total = dict_1
@@ -167,8 +167,9 @@ def list_suggestion_aggregates(dict_levels, string_matched):
     """
     import re
     list_matched = []
+    print(dict_levels.keys())
     for keydict in dict_levels.keys():
-        match = re.search(string_matched, keydict, re.IGNORECASE)
+        match = re.search(string_matched, str(keydict), re.IGNORECASE)
         if match:
             list_matched.append(keydict)
     return list_matched

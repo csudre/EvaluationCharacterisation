@@ -138,8 +138,11 @@ def read_ls_create_agglo(filename, num_layers=4, corr_it=False):
 
 
 def agglo_ls_without_speclobe(les, reg, num_layers=4, lobe_remove=None):
-    les_init = np.reshape(les[1:num_layers*10+1], [num_layers, -1])
-    reg_init = np.reshape(reg[1:num_layers*10+1], [num_layers, -1])
+    #les_init = np.reshape(les[1:num_layers*10+1], [num_layers, -1])
+    #reg_init = np.reshape(reg[1:num_layers*10+1], [num_layers, -1])
+
+    les_init = np.reshape(les[1:num_layers * 10 + 1], [-1, num_layers]).T
+    reg_init = np.reshape(reg[1:num_layers * 10 + 1], [-1, num_layers]).T
     remove_idx1 = [2*l for l in lobe_remove if l < 4]
     remove_idx2 = [2*l+1 for l in lobe_remove if l < 4]
     remove_tot = remove_idx1 + remove_idx2
@@ -151,22 +154,22 @@ def agglo_ls_without_speclobe(les, reg, num_layers=4, lobe_remove=None):
     reg_without = reg_init[:, idx]
 
     v_prob_layers = np.sum(les_without, 1)
-    v_prob_lobes = np.sum(reg_without, 0)
+    v_prob_lobes = np.sum(les_without, 0)
     v_prob_combo_lr = les_without[:, 0:-1:2] + les_without[:, 1::2]
     v_prob_lobes_lr = np.sum(v_prob_combo_lr, 0)
     v_reg_layers = np.sum(reg_without, 1)
     v_reg_lobes = np.sum(reg_without, 0)
     v_reg_combo_lr = reg_without[:, 0:-1:2] + reg_without[:, 1::2]
     v_reg_lobes_lr = np.sum(v_reg_combo_lr, 0)
-    les_fin = np.concatenate(([np.sum(les_without)], np.reshape(les_without,
+    les_fin = np.concatenate(([np.sum(les_without)], np.reshape(les_without.T,
                                                                 [-1]),
                               v_prob_layers, v_prob_lobes,
-                              np.reshape(v_prob_combo_lr, -1),
+                              np.reshape(v_prob_combo_lr.T, -1),
                               v_prob_lobes_lr), 0)
-    reg_fin = np.concatenate(([np.sum(reg_without)], np.reshape(reg_without,
+    reg_fin = np.concatenate(([np.sum(reg_without)], np.reshape(reg_without.T,
                                                                 [-1]),
                               v_reg_layers, v_reg_lobes,
-                              np.reshape(v_reg_combo_lr, -1),
+                              np.reshape(v_reg_combo_lr.T, -1),
                               v_reg_lobes_lr), 0)
     freq_fin = les_fin / reg_fin
     dist_fin = les_fin / np.sum(les_without)
