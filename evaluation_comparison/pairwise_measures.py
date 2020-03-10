@@ -411,8 +411,8 @@ class PairwiseMeasures(object):
         connected components
         """
         blobs_ref, blobs_seg, init = self._connected_components()
-        list_blobs_ref = range(1, blobs_ref[1])
-        list_blobs_seg = range(1, blobs_seg[1])
+        list_blobs_ref = range(1, blobs_ref[1]+1)
+        list_blobs_seg = range(1, blobs_seg[1]+1)
         mul_blobs_ref = np.multiply(blobs_ref[0], init)
         mul_blobs_seg = np.multiply(blobs_seg[0], init)
         list_tp_ref = np.unique(mul_blobs_ref[mul_blobs_ref > 0])
