@@ -48,21 +48,21 @@ def reorder_list(list_seg, list_ref):
     new_ref = list(list_ref)
     common_seg = find_longest(list_seg)
     common_ref = find_longest(list_ref)
-    common_seg_sub = list_seg[0][common_seg.a:common_seg.a+common_seg.size]
-    common_ref_sub = list_ref[0][common_ref.a:common_ref.a + common_ref.size]
-    print(common_seg_sub, common_ref_sub, "are common")
+    # common_seg_sub = list_seg[0][common_seg.a:common_seg.a+common_seg.size]
+    # common_ref_sub = list_ref[0][common_ref.a:common_ref.a + common_ref.size]
+    print(common_seg, common_ref, "are common")
     for s in range(0, len(new_seg)):
-        new_seg[s] = new_seg[s].replace(common_seg_sub, '')
+        new_seg[s] = new_seg[s].replace(common_seg, '')
     for r in range(0, len(new_ref)):
-        new_ref[r] = new_ref[r].replace(common_ref_sub, '')
-    common_seg = find_longest(new_seg)
-    common_ref = find_longest(new_ref)
-    common_seg_sub = new_seg[0][common_seg.a:common_seg.a + common_seg.size]
-    common_ref_sub = new_ref[0][common_ref.a:common_ref.a + common_ref.size]
+        new_ref[r] = new_ref[r].replace(common_ref, '')
+    common_seg2 = find_longest(new_seg)
+    common_ref2 = find_longest(new_ref)
+    # common_seg_sub = new_seg[0][common_seg.a:common_seg.a + common_seg.size]
+    # common_ref_sub = new_ref[0][common_ref.a:common_ref.a + common_ref.size]
     for s in range(0, len(new_seg)):
-        new_seg[s] = new_seg[s].replace(common_seg_sub, '')
+        new_seg[s] = new_seg[s].replace(common_seg2, '')
     for r in range(0, len(new_ref)):
-        new_ref[r] = new_ref[r].replace(common_ref_sub, '')
+        new_ref[r] = new_ref[r].replace(common_ref2, '')
     print(new_ref, new_seg)
     _, _, ind_s, ind_r = match_first_degree(new_seg, new_ref)
     print(ind_s, ind_r)
@@ -164,7 +164,10 @@ def find_longest(list_seg):
     comp_s.set_seqs(initial, list_seg[1])
     all_poss = comp_s.get_matching_blocks()
     list_size = [c.size for c in all_poss]
-    all_poss_ordered = all_poss[np.argsort(list_size, order='decreasing')]
+    order = np.argsort(list_size)[::-1]
+    all_poss_ordered = [all_poss[i] for i in order]
+    possible_common = ['']
+    len_common = [0]
     for p in all_poss_ordered:
         common = initial[p.a:p.a+p.size]
         for i in range(2, len(list_seg)):
@@ -175,10 +178,12 @@ def find_longest(list_seg):
             if size == 0:
                 break
             else:
-                common = common[common_seg.a, common_seg.a + common_seg.size]
+                common = common[common_seg.a: common_seg.a + common_seg.size]
+
         if len(common) > 0:
-            return common
-    return ''
+            possible_common.append(common)
+            len_common.append(len(common))
+    return possible_common[np.argmax(len_common)]
 
 # def find_longest(list_seg):
 #     comp_s = SequenceMatcher()

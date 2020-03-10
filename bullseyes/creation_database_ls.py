@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 
 TYPES = ['Les', 'Reg', 'Freq', 'Dist']
 LOBES = ['F', 'P', 'O', 'T', 'BG', 'IT']
+TERR = ['IT','PCA','MCA','ACA']
 SIDES = ['L', 'R']
 COMBINED = ['BG', 'IT']
 
@@ -150,12 +151,14 @@ def create_header_foragglo(numb_layers=4, side=None, lobes=None):
                                                      str(layer_value+1))
 
         combined = ""
-        for lobe_value in COMBINED:
-            head_lobes_side.append(type_value+lobe_value)
-            combined += lobe_value
-            for layer_value in range(0, numb_layers):
-                head_lobeslayers_full.append(type_value + lobe_value + str(
-                    layer_value+1))
+        if 'BG' in lobes and 'IT' in lobes:
+            for lobe_value in COMBINED:
+                if lobe_value in lobes:
+                    head_lobes_side.append(type_value+lobe_value)
+                    combined += lobe_value
+                    for layer_value in range(0, numb_layers):
+                        head_lobeslayers_full.append(type_value + lobe_value + str(
+                        layer_value+1))
         head_lobes.append(type_value+combined)
         for layer_value in range(0, numb_layers):
             head_lobeslayers_sides.append(type_value + combined +
@@ -165,7 +168,7 @@ def create_header_foragglo(numb_layers=4, side=None, lobes=None):
     return header
 
 
-def create_header_foragglo_corr(numb_layers=4, side=None, lobes=None):
+def create_header_foragglo_corr(numb_layers=4, side=SIDES, lobes=LOBES):
     if side is None:
         side = SIDES
     if lobes is None:

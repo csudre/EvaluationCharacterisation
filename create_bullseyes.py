@@ -4,7 +4,7 @@ import os
 import getopt
 import matplotlib.pyplot as plt
 from bullseyes.bullseye_plotting import read_ls_create_agglo, \
-    create_bullseye_plot, FULL_LABELS, FULL_LABELS_IT, \
+    create_bullseye_plot, FULL_LABELS, FULL_LABELS_IT, TERR_LABELS,\
     prepare_data_fromagglo
 from bullseyes.creation_ls_file import creation_ls, write_ls
 from nifty_utils.file_utils import split_filename
@@ -18,9 +18,11 @@ def main(argv):
     parser.add_argument('-f', dest='filewrite', metavar='file where to write',
                         type=str, required=True,
                         help='File where to write result')
+    parser.add_argument('-type', dest='type', choices=['struct','vasc'],
+                        type=str)
     parser.add_argument('-l', dest='layer_file', action='store',
                         help='Layer image to use', type=str)
-    parser.add_argument('-o', dest='lobar_file', action='store',
+    parser.add_argument('-o', dest='lobe_file', action='store',
                         help='Lobar image to use', type=str)
     parser.add_argument('-nl', dest='numb_layers', action='store', default=4,
                         type=int)
@@ -42,6 +44,13 @@ def main(argv):
               '<segmentation_file> ')
         sys.exit(2)
 
+    if args.type == 'struct':
+        num_lobes = 9
+        labels = FULL_LABELS
+    else:
+        num_lobes = 7
+        labels = TERR_LABELS
+
     if args.lobe_file is not None and args.layer_file is not None and \
             args.lesion_file is not None:
         vol_prob, vol_bin, vol_reg, connect = creation_ls(args.lobe_file,
@@ -52,12 +61,13 @@ def main(argv):
             filewrite = os.path.join(path, 'LocalSummary_'+basename+'.txt')
         write_ls(vol_prob, vol_bin, vol_reg, connect, args.filewrite)
     if args.filewrite is not None:
-        les, reg, freq, dist = read_ls_create_agglo(args.filewrite)
-        freq_full = prepare_data_fromagglo(freq, type_prepa="full")
+        les, reg, freq, dist = read_ls_create_agglo(args.filewrite, type='vasc')
+        freq_full = prepare_data_fromagglo(freq, type_prepa="full",
+                                           type_lobes='vasc')
         create_bullseye_plot(freq_full, 'YlOrRd', num_layers=args.numb_layers,
-                             num_lobes=9, vmin=0, vmax=0.25,
-                             labels=FULL_LABELS)
-        plt.savefig(os.path.join(args.path_result, 'BE_'+args.name+'.png'))
+                             num_lobes=num_lobes, vmin=0, vmax=0.25,
+                             labels=labels)
+        plt.savefig(os.path.join(args.path_result, 'BE_'+args.name+'2.png'))
     print("printednow")
 
 

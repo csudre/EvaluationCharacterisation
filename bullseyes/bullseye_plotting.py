@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 FULL_LABELS = ['Frontal', 'Parietal', 'Temporal', 'Occipital', 'Subcortical',
                'Occipital', 'Temporal', 'Parietal', 'Frontal']
+TERR_LABELS = ['ACA','MCA','PCA','IT','PCA','MCA','ACA']
 FULL_LABELS_IT = ['Frontal', 'Parietal', 'Temporal', 'Occipital',
                   'Subcortical/Infratentorial', 'Occipital', 'Temporal',
                   'Parietal', 'Frontal']
@@ -40,18 +41,23 @@ LABELS_LR = ['Frontal', 'Temporal', 'Subcortical', 'Occipital', 'Parietal']
 
 
 def prepare_data_fromagglo(data, num_layers=4, type_prepa="full", 
-                           corr_it=False):
+                           corr_it=False, type_lobes='struct'):
     data_init = None
     preparation = []
     if type_prepa == "full":
-        if corr_it:
+        if corr_it and type_lobes=='struct':
             data_init = data[1:9*num_layers+1]
-        else:
+        elif type_lobes=='struct':
             begin_full_bgit = 10*num_layers+1+10+num_layers+4*num_layers
             data_init = np.concatenate((data[1:8*num_layers],
                                         data[begin_full_bgit:begin_full_bgit
                                              + num_layers + 1]), 0)
-        preparation = [1, 3, 7, 5, 8, 4, 6, 2, 0]
+            preparation = [1, 3, 7, 5, 8, 4, 6, 2, 0]
+        else:
+            data_init = data[1:7*num_layers+1]
+            preparation = [0,1,3,5,6, 4, 2,]
+            preparation =[6, 4, 2, 0, 1, 3, 5]
+
     elif type_prepa == 'lr':
         count_before = 10*num_layers+1+10+num_layers
         data_init = data[count_before:count_before+4*num_layers]
@@ -70,7 +76,7 @@ def prepare_data_fromagglo(data, num_layers=4, type_prepa="full",
     return data_prepared
 
 
-def prepare_data_bullseye(filename, num_layers=4, corr_it=False):
+def prepare_data_bullseye(filename, num_layers=4, corr_it=False, type='struct'):
     with open(filename) as f_name:
         content = f_name.readlines()
     # you may also want to remove whitespace characters like `\n` at
@@ -79,10 +85,15 @@ def prepare_data_bullseye(filename, num_layers=4, corr_it=False):
     # FL FR PL PR OL OR TL TR BG IT
     # 0  1  2  3  4  5  6  7  8
     # FR PR TR OR BGIT OL TL PL FL
-
-    v_prob = np.zeros([9*num_layers, 1])
-    v_reg = np.zeros([9*num_layers, 1])
-    preparation = [1, 3, 7, 5, 8, 4, 6, 2, 0]
+    if type=='struct':
+        v_prob = np.zeros([9*num_layers, 1])
+        v_reg = np.zeros([9*num_layers, 1])
+        preparation = [1, 3, 7, 5, 8, 4, 6, 2, 0]
+    else:
+        v_prob = np.zeros([len(TERR_LABELS)*num_layers, 1])
+        v_reg = np.zeros([len(TERR_LABELS*num_layers, 1)])
+        preparation = [0,1,3,5,6, 4, 2]
+        preparation =[6, 4, 2, 0, 1, 3, 5]
     preparation *= num_layers
     preparation_init = preparation
     for layer in range(1, num_layers):
@@ -93,16 +104,20 @@ def prepare_data_bullseye(filename, num_layers=4, corr_it=False):
         string_split = content[preparation[index]].split(' ')
         v_prob[index] = float(string_split[0])
         v_reg[index] = float(string_split[2])
-        if np.floor_divide(index, num_layers) == 8 and not corr_it:
+        if np.floor_divide(index, num_layers) == 8 and not corr_it and \
+                type=='struct':
             v_prob[index] += float(content[9*num_layers].split(' ')[0])
             v_reg[index] += float(content[9 * num_layers].split(' ')[2])
-    string_tot = content[10*num_layers].split(' ')
+    if type=='struct':
+        string_tot = content[10*num_layers].split(' ')
+    else:
+        string_tot = content[len(TERR_LABELS)*num_layers].split(' ')
     v_perc = np.divide(v_prob, v_reg)
     v_dist = np.divide(v_prob, float(string_tot[0]))
     return v_perc, v_dist
 
 
-def read_ls_create_agglo(filename, num_layers=4, corr_it=False):
+def read_ls_create_agglo(filename, num_layers=4, corr_it=False, type='struct'):
     with open(filename) as f_name:
         content = f_name.readlines()
     # you may also want to remove whitespace characters like `\n`
@@ -120,12 +135,19 @@ def read_ls_create_agglo(filename, num_layers=4, corr_it=False):
     v_reg_res = np.reshape(v_reg, [num_layers, -1])
     v_prob_layers = np.sum(v_prob_res, 1)
     v_prob_lobes = np.sum(v_prob_res, 0)
-    v_prob_combo_lr = v_prob_res[:, 0:-1:2] + v_prob_res[:, 1::2]
-    v_prob_lobes_lr = np.sum(v_prob_combo_lr, 0)
+    if type is 'struct':
+        v_prob_combo_lr = v_prob_res[:, 0:-1:2] + v_prob_res[:, 1::2]
+        v_prob_lobes_lr = np.sum(v_prob_combo_lr, 0)
+        v_reg_combo_lr = v_reg_res[:, 0:-1:2] + v_reg_res[:, 1::2]
+        v_reg_lobes_lr = np.sum(v_reg_combo_lr, 0)
+    else:
+        v_prob_combo_lr = v_prob_res[:, 1::2] + v_prob_res[:, 2::2]
+        v_prob_lobes_lr = np.sum(v_prob_combo_lr, 0)
+        v_reg_combo_lr = v_reg_res[:, 1::2] + v_reg_res[:, 2::2]
+        v_reg_lobes_lr = np.sum(v_reg_combo_lr, 0)
     v_reg_layers = np.sum(v_reg_res, 1)
     v_reg_lobes = np.sum(v_reg_res, 0)
-    v_reg_combo_lr = v_reg_res[:, 0:-1:2] + v_reg_res[:, 1::2]
-    v_reg_lobes_lr = np.sum(v_reg_combo_lr, 0)
+
     les_fin = np.concatenate(([v_prob_tot], v_prob, v_prob_layers, v_prob_lobes,
                              np.reshape(v_prob_combo_lr, -1),
                               v_prob_lobes_lr), 0)
@@ -137,7 +159,8 @@ def read_ls_create_agglo(filename, num_layers=4, corr_it=False):
     return les_fin, reg_fin, freq_fin, dist_fin
 
 
-def agglo_ls_without_speclobe(les, reg, num_layers=4, lobe_remove=None):
+def agglo_ls_without_speclobe(les, reg, num_layers=4, lobe_remove=None,
+                              ):
     #les_init = np.reshape(les[1:num_layers*10+1], [num_layers, -1])
     #reg_init = np.reshape(reg[1:num_layers*10+1], [num_layers, -1])
 
@@ -230,8 +253,9 @@ def create_bullseye_plot(data, color, num_layers=4, num_lobes=9, vmin=0,
                    fontsize=10,
                    horizontalalignment='center', verticalalignment='center')
     # for (t,l) in zip(xT,xL):
-    #     plt.xticks(t, l, y=0.11, rotation=t)
-
+    #     plt.xticks(t, l, 0y=0.11, rotation=t)
+    pylab.text(0.95,1.03,"Right",fontsize=10, transform=axis.transAxes)
+    pylab.text(0.05, 1.03, "Left", fontsize=10, transform=axis.transAxes)
     axl = fig.add_axes([0.87, 0.1, 0.03, 0.8])
     cb1 = matplotlib.colorbar.ColorbarBase(axl, cmap=colormap, norm=norm,
                                            orientation='vertical')

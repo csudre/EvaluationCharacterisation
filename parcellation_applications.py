@@ -4,6 +4,17 @@ import sys
 import glob
 import nibabel as nib
 import pandas as pd
+import numpy as np
+from scipy.ndimage.morphology import binary_dilation, binary_erosion, \
+    binary_fill_holes, distance_transform_edt
+
+DICT_VASCULAR = {'MCA_Left': 22 , 'MCA_Right': 21, 'PCA_Left': 12, 'PCA_Right':
+11,
+'ACA_Right': 31,'ACA_Left': 32}
+DICT_STRUCT = {'FrontalLeft': 1, 'FrontalRight': 2, 'ParietalLeft':3,
+               'ParietalRight':4, 'OccipitalLeft':5, 'OccipitalRight':6,
+               'TemporalLeft':7, 'TemporalRight':8, 'BasalGanglia':9,
+               'Infratentorial':10}
 
 from parcellation_utils.parcellation_aggregate import combine_seg,\
     prepare_use_gif_hierarchy, \
@@ -17,6 +28,8 @@ def main(argv):
         __file__))[0], 'parcellation_utils', 'GIFHierarchy.csv')
     association_file_dbgif = os.path.join(os.path.split(os.path.abspath(
         __file__))[0], 'parcellation_utils', 'KeysHierarchy_ordered.csv')
+    lobesfile = os.path.join(os.path.split(os.path.abspath(
+        __file__))[0], 'parcellation_utils', 'TerritoriesLobesMapping.csv')
     demographic_file = None
     pattern = "*.xml"
     exclusion = "zzzzzzzz"
@@ -58,6 +71,15 @@ def main(argv):
                                  "be eventually combined")
     parser_seg.add_argument('-look_up', dest='look_up', action='store',
                             type=str)
+
+
+    parser_lobes = subparsers.add_parser('lobes')
+    parser_lobes.add_argument('-s', dest='split', action='store_true')
+    parser_lobes.add_argument('-laplace', dest='laplace_file',
+                              action='store', type=str)
+    parser_lobes.add_argument('-a', dest='assign', choices=['euc', 'lap'],
+                              default='euc')
+    parser_lobes.add_argument('-m', dest='mask', type=str)
 
     # subparser for parsing of xml file of the parcellation file or if no xml
     #  file, creating the volumetric database based on all possible labels
@@ -119,6 +141,130 @@ def main(argv):
 
     list_files = glob.glob(args.file_pattern)
     print(len(list_files))
+
+    if args.subcommand == 'lobes':
+
+        df_parc = pd.DataFrame.from_csv(lobesfile)
+        val_terr = np.unique(df_parc['FullTerr'])
+        val_lobe = np.unique(df_parc['FullStruct'])
+        if not args.split:
+            for f in list_files:
+                parc_nii = nib.load(f)
+                parc_data = parc_nii.get_data()
+                lobar_separation = np.zeros_like(parc_data)
+                terr_separation = np.zeros_like(parc_data)
+                for val in val_terr:
+                    if val>0:
+                        df_select = df_parc[df_parc['FullTerr']==val]
+                        val_gif = np.unique(df_select['GIF'])
+                        seg_temp = np.where(parc_data in val_gif, np.ones_like(
+                            parc_data) * val, np.zeros_like(parc_data))
+                        terr_separation += seg_temp
+                for val in val_lobe:
+                    if val>0:
+                        df_select = df_parc[df_parc['FullStruct']==val]
+                        val_gif = np.unique(df_select['GIF'])
+                        seg_temp = np.where(parc_data in val_gif, np.ones_like(
+                            parc_data) * val, np.zeros_like(parc_data))
+                        if val==9:
+                            seg_temp = seg_temp.astype(bool)
+                            seg_temp = binary_dilation(seg_temp, iterations=4)
+                            seg_temp = binary_fill_holes(seg_temp)
+                            seg_temp = binary_erosion(seg_temp, iterations=4)
+                            seg_temp = seg_temp.astype(float)*9
+
+                        lobar_separation += seg_temp
+                name_lobes = 'Lobes_' + os.path.split(f)[1]
+                name_terr = 'Territories_' + os.path.split(f)[1]
+                name_lobes = os.path.join(args.output_path, name_lobes)
+                name_terr = os.path.join(args.output_path, name_terr)
+                lobes_nii = nib.Nifti1Image(lobar_separation, parc_nii.affine)
+                terr_nii = nib.Nifti1Image(terr_separation, parc_nii.affine)
+                nib.save(terr_nii, name_terr)
+                nib.save(lobes_nii, name_lobes)
+
+        # For now the following is only perform for one given subject and
+        # does not support pairing of multiple files:
+        if args.split:
+            f = list_files[0]
+            parc_nii = nib.load(list_files[0])
+            parc_data = parc_nii.get_data()
+            zooms = parc_nii.header.get_zooms()
+            if args.mask is None:
+                mask = (parc_data > 12).astype(int)
+                ventr_data = (parc_data < 54).astype(int) * (parc_data >
+                                                         49).astype(int)
+                mask -= ventr_data
+            else:
+                mask = nib.load(args.mask).get_data()
+            lobar_separation = np.zeros_like(parc_data)
+            terr_separation = np.zeros_like(parc_data)
+            list_dist_lobes = []
+            list_dist_terr = []
+            for val in val_terr:
+                if val > 0:
+                    df_select = df_parc[df_parc['FullTerr'] == val]
+                    val_gif = np.unique(df_select['GIF'])
+                    seg_temp = np.zeros_like(parc_data)
+                    for gv in val_gif:
+                        seg_temp = np.where(parc_data==gv, np.ones_like(
+                        parc_data) , seg_temp)
+                    terr_separation += seg_temp * val
+                    print(np.sum(seg_temp))
+                    distance_terr = distance_transform_edt(seg_temp * -1 +1,
+                                                           sampling=zooms)
+                    list_dist_terr.append(np.expand_dims(distance_terr *
+                                                         mask, -1))
+            for val in val_lobe:
+                if val > 0:
+                    df_select = df_parc[df_parc['FullStruct'] == val]
+                    val_gif = np.unique(df_select['GIF'])
+
+                    seg_temp = np.zeros_like(parc_data)
+                    for gv in val_gif:
+                        seg_temp = np.where(parc_data == gv, np.ones_like(
+                            parc_data), seg_temp)
+
+                    if val == 9:
+                        seg_temp = seg_temp.astype(bool)
+                        seg_temp = binary_dilation(seg_temp, iterations=4)
+                        seg_temp = binary_fill_holes(seg_temp)
+                        seg_temp = binary_erosion(seg_temp, iterations=4)
+                        seg_temp = seg_temp.astype(float)
+
+                    lobar_separation += seg_temp * val
+                    if val < 9:
+                        distance_lobe = distance_transform_edt(seg_temp * -1 +1,
+                                                           sampling=zooms)
+                        list_dist_lobes.append(np.expand_dims(distance_lobe *
+                                               mask, -1))
+            stacked_dist_terr = np.concatenate(list_dist_terr, -1)
+            stacked_dist_lobes = np.concatenate(list_dist_lobes, -1)
+            final_assign_terr = (np.argmin(stacked_dist_terr, -1) + 1) * mask
+            final_assign_lobes = (np.argmin(stacked_dist_lobes, -1) +1) *mask
+            final_assign_lobes = np.where(lobar_separation>8,
+                                          lobar_separation, final_assign_lobes)
+            name_lobes = 'Lobes_' + os.path.split(f)[1]
+            name_terr = 'Territories_' + os.path.split(f)[1]
+            name_asslobes = 'AssignLobes_' + os.path.split(f)[1]
+            name_assterr = 'AssignTerritories_' + os.path.split(f)[1]
+            name_lobes = os.path.join(args.output_path, name_lobes)
+            name_terr = os.path.join(args.output_path, name_terr)
+            name_asslobes = os.path.join(args.output_path, name_asslobes)
+            name_assterr = os.path.join(args.output_path, name_assterr)
+            lobes_nii = nib.Nifti1Image(lobar_separation, parc_nii.affine)
+            terr_nii = nib.Nifti1Image(terr_separation, parc_nii.affine)
+            nib.save(terr_nii, name_terr)
+            nib.save(lobes_nii, name_lobes)
+            asslobes_nii = nib.Nifti1Image(final_assign_lobes, parc_nii.affine)
+            assterr_nii = nib.Nifti1Image(final_assign_terr, parc_nii.affine)
+            nib.save(assterr_nii, name_assterr)
+            nib.save(asslobes_nii, name_asslobes)
+
+
+
+
+
 
     if args.subcommand == 'parsing':
 

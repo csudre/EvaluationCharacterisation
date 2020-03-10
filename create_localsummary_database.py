@@ -13,6 +13,7 @@ from bullseyes.creation_database_ls import create_header_foragglo, \
     create_header_foragglo_corr
 from bullseyes.bullseye_plotting import read_ls_create_agglo, agglo_ls_without_speclobe
 
+from bullseyes.creation_database_ls import LOBES, TERR
 
 def main(argv):
 
@@ -25,10 +26,12 @@ def main(argv):
                         help='Regexp pattern for the lesion files', type=str)
     parser.add_argument('-l', dest='layer_pattern', action='store',
                         help='Regexp pattern for the layer files', type=str)
-    parser.add_argument('-o', dest='lobar_pattern', action='store',
+    parser.add_argument('-o', dest='lobe_pattern', action='store',
                         help='Regexp pattern for the lobar files', type=str)
     parser.add_argument('-nl', dest='numb_layers', action='store', default=4,
                         type=int)
+    parser.add_argument('-type', dest='type', choices=['struct', 'vasc'],
+                        default='struct')
     parser.add_argument('-r', dest='result_file', action='store')
     parser.add_argument('-p', dest='path_result', action='store',
                         help='Path where to save the results', type=str,
@@ -80,22 +83,34 @@ def main(argv):
     result_array = None
     for f in list_files:
         les_fin, reg_fin, freq_fin, dist_fin = read_ls_create_agglo(
-            f, num_layers=args.numb_layers, corr_it=args.corr_it)
-        les_fin2, reg_fin2, freq_fin2, dist_fin2 = agglo_ls_without_speclobe(
-            les_fin, reg_fin, 4, lobe_remove=[])
-        final_array = np.concatenate((les_fin, reg_fin, freq_fin,
+            f, num_layers=args.numb_layers, corr_it=args.corr_it,
+            type=args.type)
+        if args.type == 'struct':
+            les_fin2, reg_fin2, freq_fin2, dist_fin2 = agglo_ls_without_speclobe(
+            les_fin, reg_fin, 4, lobe_remove=[], type=args.type)
+            final_array = np.concatenate((les_fin, reg_fin, freq_fin,
                                       dist_fin, les_fin2, reg_fin2, freq_fin2,
                                       dist_fin2), 0).T
+        else:
+            final_array = np.concatenate((les_fin, reg_fin, freq_fin,
+                                          dist_fin), 0).T
         [_, basename, _] = split_filename(f)
         final_array = [basename] + list(final_array)
         if result_array is None:
             result_array = [final_array]
         else:
             result_array = result_array + [final_array]
-    header_columns = create_header_foragglo(args.numb_layers)
-    header_bis = create_header_foragglo_corr(lobes=['F', 'P', 'O', 'T', 'BG',
-                                                    'IT'])
-    header_columns_tot = header_columns + header_bis
+    lobes_choice = LOBES
+    if args.type == 'struct':
+        lobes_choice = LOBES
+    if args.type == 'vasc':
+        lobes_choice = TERR
+    header_columns = create_header_foragglo(args.numb_layers, lobes=lobes_choice)
+    if args.type == 'struct':
+        header_bis = create_header_foragglo_corr(lobes=lobes_choice)
+        header_columns_tot = header_columns + header_bis
+    else:
+        header_columns_tot = header_columns
     data_pd = pd.DataFrame(result_array, columns=header_columns_tot)
     data_pd.to_csv(args.result_file)
 

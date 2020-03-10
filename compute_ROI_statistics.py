@@ -6,6 +6,7 @@ import getopt
 import glob
 import numpy as np
 import argparse
+import pandas as pd
 from skimage import measure
 from scipy.ndimage import label
 from evaluation_comparison.region_properties import RegionProperties
@@ -100,9 +101,15 @@ def main(argv):
     parser.add_argument('-i', dest='input_image', metavar='input pattern',
                         type=str,
                         help='RegExp pattern for the input files')
+    parser.add_argument('-append', dest='append_toexisting',
+                        action='store_true', help='indicates if the output '
+                                                  'should be appended to '
+                                                  'existing file')
     parser.add_argument('-m', dest='mask_image', action='store',
                         default='', type=str,
                         help='RegExp pattern for the mask files')
+    parser.add_argument('-cc', dest='cc_file', type=str, action='store',
+                        help='CCfile')
     parser.add_argument('-type', dest='type', action='store',
                         default='paired', type=str, help='indicates if mask '
                                                          'and image should be paired')
@@ -141,6 +148,8 @@ def main(argv):
           args.threshold)
     images = glob.glob(args.input_image)
     masks = glob.glob(args.mask_image)
+    if args.cc_file is not None:
+        cc_maps = glob.glob(args.cc_file)
     print(images, masks)
     pth, name, ext = split_filename(images[0])
     if not args.name == '':
@@ -155,13 +164,16 @@ def main(argv):
         name)
     iteration = 0
 
-    while os.path.exists(os.path.join(pth, out_name)):
-        iteration += 1
-        out_name = '{}_{}_{}.csv'.format(
-            OUTPUT_FILE_PREFIX,
-            name,
-            str(iteration))
+    if not args.append_toexisting:
+        while os.path.exists(os.path.join(pth, out_name)):
+            iteration += 1
+            out_name = '{}_{}_{}.csv'.format(
+                OUTPUT_FILE_PREFIX,
+                name,
+                str(iteration))
 
+
+    flag_existprior = os.path.exists(os.path.join(pth, out_name))
     out_stream = open(os.path.join(pth, out_name), 'a+')
     print("Writing {} to {}".format(out_name, pth))
     if args.threshold is None:
@@ -185,7 +197,8 @@ def main(argv):
     fixed_fields = 'Mask,Image'
     if args.analysis != 'binary':
         fixed_fields = 'Mask,Image,Label'
-    out_stream.write(fixed_fields + header_str + '\n')
+    if not flag_existprior:
+        out_stream.write(fixed_fields + header_str + '\n')
 
     if args.analysis == 'cc' and args.measures[0] == 'shape':
         mask_names_init = glob.glob(args.mask_image)
@@ -193,17 +206,29 @@ def main(argv):
             mask_nii = nib.load(mask_file)
             mask = mask_nii.get_data()
             mask = (mask>args.threshold)
-            cc_map = measure.label(mask, connectivity=args.neighborhood,
-                               background=0)
-            cc_map, n_lab = label(mask)
+            if args.cc_file is not None:
+                cc_map = nib.load(args.cc_file).get_data()
+            else:
+                # cc_map = measure.label(mask, connectivity=args.neighborhood,
+                #                background=0)
+                cc_map, n_lab = label(mask)
 
-            nii_cc = nib.Nifti1Image(cc_map.astype(int), mask_nii.affine)
-            nib.save(nii_cc, os.path.join(pth,
-                                          'CC_'+args.name+'_'+str(
+                nii_cc = nib.Nifti1Image(cc_map.astype(int), mask_nii.affine)
+                nib.save(nii_cc, os.path.join(pth,
+                                          'CC_'+os.path.split(mask_file)[1]
+                                              .rstrip(
+                                              '.nii.gz')+'_'+str(
                                               args.threshold)+'.nii.gz'))
             values_label = np.unique(cc_map)
             values_label = [v for v in values_label if v > 0]
+            if args.append_toexisting and os.path.exists(os.path.join(pth, out_name)):
+                df_exist = pd.read_csv(os.path.join(pth, out_name))
+                val_max = np.max(df_exist['Label'])
+                values_label = [v for v in values_label if v > val_max]
+                print("Beginning at %d out of %d" %(val_max+1, np.max(
+                    values_label)))
             for val in values_label:
+                print("treating %d from %s" %(val, mask_file))
                 mask_label = np.where(cc_map == val, np.ones_like(mask),
                                   np.zeros_like(mask))
 
