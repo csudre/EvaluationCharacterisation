@@ -24,6 +24,10 @@ LIST_HIST = ['weighted_mean', 'weighted_std', 'median', 'skewness',
              'kurtosis', 'wquantile_1', 'wquantile_5', 'wquantile_25',
              'wquantile_50', 'wquantile_75', 'wquantile_95', 'wquantile_99']
 
+MATCH_OUTPUT  = {
+
+}
+
 
 class RegionProperties(object):
     def __init__(self, seg, img, measures,
@@ -77,130 +81,290 @@ class RegionProperties(object):
         if self.haralick_flag:
             self.harilick_m = np.atleast_2d(self.harilick_matrix())
         # self.glszm = self.grey_level_size_matrix()
-        self.m_dict = {
-            'centre of mass': (self.centre_of_mass, ['CoMx',
+
+        self.m_dict = {}
+        for m in measures:
+            if m == 'centre of mass':
+                self.m_dict['centre of mass'] = (self.centre_of_mass, ['CoMx',
                                                      'CoMy',
-                                                     'CoMz']),
-            'volume': (self.volume,
-                       ['NVoxels', 'NVoxelsBinary', 'Vol', 'VolBinary']),
-            'max_dist_com': (self.max_dist_com, ['MaxDistCoM']),
-            'surface': (self.surface, ['NSurface',
+                                                     'CoMz'])
+            if m == 'volume':
+                self.m_dict['volume'] =(self.volume,
+                       ['NVoxels', 'NVoxelsBinary', 'Vol', 'VolBinary'])
+            if m == 'max_dist_com':
+                self.m_dict['max_dist_com'] = (self.max_dist_com, ['MaxDistCoM'])
+            if m == 'surface':
+                self.m_dict['surface'] = (self.surface, ['NSurface',
                                        'NSurfaceBinary',
                                        'SurfaceVol',
-                                       'SurfaceVolBinary']),
-            'surface volume ratio': (self.sav, ['SAVNumb',
+                                       'SurfaceVolBinary'])
+            if m == 'surface volume ratio':
+                self.m_dict['surface volume ratio']= (self.sav, ['SAVNumb',
                                                 'SAVNumBinary',
                                                 'SAV',
-                                                'SAVBinary']),
-            'compactness': (self.compactness, ['CompactNumb',
+                                                'SAVBinary'])
+            if m == 'compactness':
+                self.m_dict['compactness'] = (self.compactness, ['CompactNumb',
                                                'CompactNumbBinary',
                                                'Compactness',
-                                               'CompactnessBinary']),
-            'solidity': (self.solidity, ['Solidity']),
-            'balance': (self.balanced_rep, ['Balance']),
-            'fractal_dim': (self.fractal_dimension, ['Fractal_dim']),
-            'circularity': (self.circularity, ['Circularity']),
-            'contour_smoothness': (self.contour_smoothness, ['Contour_Smooth']),
-            'eigen_values': (self.ellipsoid_lambdas, ['lambda_%i' % i for i
-                                                      in range(0,3)]),
-            'ratio_eigen': (self.ratio_eigen, ['ratio_eigen_%i' % i for i in
-                                               range(0,3)]),
-            'fa': (self.fractional_anisotropy, ['FA']),
-            'mean': (self.mean_, ['Mean_%s' % i for i in img_id]),
-            'weighted_mean': (self.weighted_mean_,
-                              ['Weighted_mean_%s' % i for i in img_id]),
-            'weighted_std': (self.weighted_std_, ['Weighted_std_%s' % i for i
-                                                  in img_id]),
-            'median': (self.median_, ['Median_%s' % i for i in img_id]),
-            'skewness': (self.skewness_, ['Skewness_%s' % i for i in img_id]),
-            'kurtosis': (self.kurtosis_, ['Kurtosis_%s' % i for i in img_id]),
-            'min': (self.min_ if np.sum(self.seg) > 0 else
-                    self.return_0, ['Min_%s' % i for i in img_id]),
-            'max': (self.max_ if np.sum(self.seg) > 0 else
-                    self.return_0, ['Max_%s' % i for i in img_id]),
-            'quantile_1': (self.quantile_1 if np.sum(self.seg) > 0 else
-                           self.return_0, ['P1_%s' % i for i in img_id]),
-            'quantile_5': (self.quantile_5 if np.sum(self.seg) > 0 else
-                           self.return_0, ['P5_%s' % i for i in img_id]),
-            'quantile_25': (self.quantile_25 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P25_%s' % i for i in img_id]),
-            'quantile_50': (self.median_ if np.sum(self.seg) > 0 else
-                            self.return_0, ['P50_%s' % i for i in img_id]),
-            'quantile_75': (self.quantile_75 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P75_%s' % i for i in img_id]),
-            'quantile_95': (self.quantile_95 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P95_%s' % i for i in img_id]),
-            'quantile_99': (self.quantile_99 if np.sum(self.seg) > 0 else
-                            self.return_0, ['P99_%s' % i for i in img_id]),
-
-            'wquantile_1': (self.weighted_quantile_1 if np.sum(self.seg) > 0
+                                               'CompactnessBinary'])
+            if m == 'solidity':
+                self.m_dict['solidity'] = (self.solidity, ['Solidity'])
+            if m == 'balance':
+                self.m_dict['balance'] = (self.balanced_rep, ['Balance'])
+            if m == 'fractal_dim':
+                self.m_dict['fractal_dim'] = (self.fractal_dimension, ['Fractal_dim'])
+            if m == 'circularity':
+                self.m_dict['circularity'] = (self.circularity, ['Circularity'])
+            if m == 'contour_smoothness':
+                self.m_dict['contour_smoothness'] = (self.contour_smoothness, ['Contour_Smooth'])
+            if m == 'eigen_values':
+                self.m_dict['eigen_values'] = (self.ellipsoid_lambdas, ['lambda_%i' % i for i
+                                                      in range(0, 3)])
+            if m == 'ratio_eigen':
+                self.m_dict['ratio_eigen'] = (self.ratio_eigen, ['ratio_eigen_%i' % i for i in
+                                               range(0, 3)])
+            if m == 'fa':
+                self.m_dict['fa'] = (self.fractional_anisotropy, ['FA'])
+            if m == 'mean':
+                self.m_dict['mean'] = (self.mean_, ['Mean_%s' % i for i in img_id])
+            if m == 'weighted_mean':
+                self.m_dict['weighted_mean'] = (self.weighted_mean_,
+                              ['Weighted_mean_%s' % i for i in img_id])
+            if m == 'weighted_std':
+                self.m_dict['weighted_std'] = (self.weighted_std_, ['Weighted_std_%s' % i for i
+                                                  in img_id])
+            if m == 'median':
+                self.m_dict['median'] = (self.median_, ['Median_%s' % i for i in img_id])
+            if m == 'skewness':
+                self.m_dict['skewness'] = (self.skewness_, ['Skewness_%s' % i for i in img_id])
+            if m == 'kurtosis':
+                self.m_dict['kurtosis'] = (self.kurtosis_, ['Kurtosis_%s' % i for i in img_id])
+            if m == 'min':
+                self.m_dict['min'] = (self.min_ if np.sum(self.seg) > 0 else
+                    self.return_0, ['Min_%s' % i for i in img_id])
+            if m == 'max':
+                self.m_dict['max'] = (self.max_ if np.sum(self.seg) > 0 else
+                    self.return_0, ['Max_%s' % i for i in img_id])
+            if m == 'quantile_1':
+                self.m_dict['quantile_1'] = (self.quantile_1 if np.sum(self.seg) > 0 else
+                           self.return_0, ['P1_%s' % i for i in img_id])
+            if m == 'quantile_5':
+                self.m_dict['quantile_5'] = (self.quantile_5 if np.sum(self.seg) > 0 else
+                           self.return_0, ['P5_%s' % i for i in img_id])
+            if m == 'quantile_25':
+                self.m_dict['quantile_25'] = (self.quantile_25 if np.sum(self.seg) > 0 else
+                            self.return_0, ['P25_%s' % i for i in img_id])
+            if m == 'quantile_50':
+                self.m_dict['quantile_50'] = (self.median_ if np.sum(self.seg) > 0 else
+                            self.return_0, ['P50_%s' % i for i in img_id])
+            if m == 'quantile_75':
+                self.m_dict['quantile_75'] = (self.quantile_75 if np.sum(self.seg) > 0 else
+                            self.return_0, ['P75_%s' % i for i in img_id])
+            if m == 'quantile_95':
+                self.m_dict['quantile_95']= (self.quantile_95 if np.sum(self.seg) > 0 else
+                            self.return_0, ['P95_%s' % i for i in img_id])
+            if m == 'quantile_99':
+                self.m_dict['quantile_99']= (self.quantile_99 if np.sum(self.seg) > 0 else
+                            self.return_0, ['P99_%s' % i for i in img_id])
+            if m == 'wquantile_1':
+                self.m_dict['wquantile_1']= (self.weighted_quantile_1 if np.sum(self.seg) > 0
                             else
-                           self.return_0, ['P1_%s' % i for i in img_id]),
-            'wquantile_5': (self.weighted_quantile_5 if np.sum(self.seg) > 0
-                            else
-                           self.return_0, ['P5_%s' % i for i in img_id]),
-            'wquantile_25': (self.weighted_quantile_25 if np.sum(self.seg) >
+                            self.return_0, ['P1_%s' % i for i in img_id])
+            if m == 'wquantile_5':
+                self.m_dict['wquantile_5'] = (self.weighted_quantile_5 if np.sum(self.seg) > 0
+                            else self.return_0, ['P5_%s' % i for i in img_id])
+            if m == 'wquantile_25':
+                self.m_dict['wquantile_25']= (self.weighted_quantile_25 if np.sum(self.seg) >
                                                           0 else
-                            self.return_0, ['P25_%s' % i for i in img_id]),
-            'wquantile_50': (self.weighted_quantile_50 if np.sum(self.seg) > 0
-                            else
-                            self.return_0, ['P50_%s' % i for i in img_id]),
-            'wquantile_75': (self.weighted_quantile_75 if np.sum(self.seg) >
+                             self.return_0, ['P25_%s' % i for i in img_id])
+            if m == 'wquantile_50':
+                self.m_dict['wquantile_50']= (self.weighted_quantile_50 if np.sum(self.seg) > 0
+                             else
+                             self.return_0, ['P50_%s' % i for i in img_id])
+            if m == 'wquantile_75':
+                self.m_dict['wquantile_75']= (self.weighted_quantile_75 if np.sum(self.seg) >
                                                           0 else
-                            self.return_0, ['P75_%s' % i for i in img_id]),
-            'wquantile_95': (self.weighted_quantile_95 if np.sum(self.seg) >
+                             self.return_0, ['P75_%s' % i for i in img_id])
+            if m == 'wquantile_95':
+                self.m_dict['wquantile_95']= (self.weighted_quantile_95 if np.sum(self.seg) >
                                                           0 else
-                            self.return_0, ['P95_%s' % i for i in img_id]),
-            'wquantile_99': (self.weighted_quantile_99 if np.sum(self.seg) >
+                             self.return_0, ['P95_%s' % i for i in img_id])
+            if m == 'wquantile_99':
+                self.m_dict['wquantile_99']= (self.weighted_quantile_99 if np.sum(self.seg) >
                                                           0 else
-                            self.return_0, ['P99_%s' % i for i in img_id]),
+                             self.return_0, ['P99_%s' % i for i in img_id])
+            if m == 'std':
+                self.m_dict['std']= (self.std_ if np.sum(self.seg) > 0 else self.return_0,
+                    ['STD_%s' % i for i in img_id])
+            if self.haralick_flag:
+                self.m_dict['asm']= (self.call_asm if np.sum(self.seg) > 0 else self.return_0,
+                    ['asm%s' % i for i in img_id])
 
-            'std': (self.std_ if np.sum(self.seg) > 0 else self.return_0,
-                    ['STD_%s' % i for i in img_id]),
-            'asm': (self.call_asm if np.sum(self.seg) > 0 else self.return_0,
-                    ['asm%s' % i for i in img_id]),
-
-            'contrast': (self.call_contrast if np.sum(self.seg) > 0 and
-                         self.haralick_flag else self.return_0,
-                         ['contrast%s' % i for i in img_id]),
-            'correlation': (self.call_correlation if np.sum(self.seg) > 0 and
-                            self.haralick_flag else self.return_0,
-                            ['correlation%s' % i for i in img_id]),
-            'sumsquare': (self.call_sum_square if np.sum(self.seg) > 0 and
-                          self.haralick_flag else self.return_0,
-                          ['sumsquare%s' % i for i in img_id]),
-            'sum_average': (self.call_sum_average if np.sum(self.seg) > 0 and
-                            self.haralick_flag else self.return_0,
-                            ['sum_average%s' % i for i in img_id]),
-            'idifferentmomment': (self.call_idifferent_moment if np.sum(
+                self.m_dict['contrast']= (self.call_contrast if np.sum(self.seg) > 0 and
+                                               self.haralick_flag else self.return_0,
+                         ['contrast%s' % i for i in img_id])
+                self.m_dict['correlation']= (self.call_correlation if np.sum(self.seg) > 0 and
+                                                     self.haralick_flag else self.return_0,
+                            ['correlation%s' % i for i in img_id])
+                self.m_dict['sumsquare']= (self.call_sum_square if np.sum(self.seg) > 0 and
+                                                  self.haralick_flag else self.return_0,
+                          ['sumsquare%s' % i for i in img_id])
+                self.m_dict['sum_average']= (self.call_sum_average if np.sum(self.seg) > 0 and
+                                                     self.haralick_flag else self.return_0,
+                            ['sum_average%s' % i for i in img_id])
+                self.m_dict['idifferentmomment']= (self.call_idifferent_moment if np.sum(
                 self.seg) > 0 and self.haralick_flag else self.return_0,
-                                  ['idifferentmomment%s' % i for i in img_id]),
-            'sumentropy': (self.call_sum_entropy if np.sum(self.seg) > 0 and
-                           self.haralick_flag else self.return_0,
-                           ['sumentropy%s' % i for i in img_id]),
-            'entropy': (self.call_entropy if np.sum(self.seg) > 0 and
-                        self.haralick_flag else self.return_0,
-                        ['entropy%s' % i for i in img_id]),
-            'differencevariance': (self.call_difference_variance if
+                                  ['idifferentmomment%s' % i for i in img_id])
+                self.m_dict['sumentropy']= (self.call_sum_entropy if np.sum(self.seg) > 0 and
+                                                    self.haralick_flag else self.return_0,
+                           ['sumentropy%s' % i for i in img_id])
+                self.m_dict['entropy']= (self.call_entropy if np.sum(self.seg) > 0 and
+                                             self.haralick_flag else self.return_0,
+                        ['entropy%s' % i for i in img_id])
+                self.m_dict['differencevariance']= (self.call_difference_variance if
                                    np.sum(self.seg) > 0 and
                                    self.haralick_flag else self.return_0,
                                    ['differencevariance%s' % i for i in
-                                    img_id]),
-            'differenceentropy': (self.call_difference_entropy if
+                                    img_id])
+                self.m_dict['differenceentropy']= (self.call_difference_entropy if
                                   np.sum(self.seg) > 0 and self.haralick_flag
                                   else self.return_0,
-                                  ['differenceentropy%s' % i for i in img_id]),
-            'sumvariance': (self.call_sum_variance if np.sum(self.seg) > 0 and
-                            self.haralick_flag else self.return_0,
-                            ['sumvariance%s' % i for i in img_id]),
-            'imc1': (self.call_imc1 if np.sum(self.seg) > 0 and
-                     self.haralick_flag else self.return_0, ['imc1%s' % i for
-                                                             i in img_id]),
-            'imc2': (self.call_imc2 if np.sum(self.seg) > 0 and
-                     self.haralick_flag else self.return_0, ['imc2%s' % i for
-                                                             i in img_id])
+                                  ['differenceentropy%s' % i for i in img_id])
+                self.m_dict['sumvariance']= (self.call_sum_variance if np.sum(self.seg) > 0 and
+                                                      self.haralick_flag else self.return_0,
+                            ['sumvariance%s' % i for i in img_id])
+                self.m_dict['imc1'] = (self.call_imc1 if np.sum(self.seg) > 0 and
+                                       self.haralick_flag else self.return_0, ['imc1%s' % i for
+                                                                               i in img_id])
+                self.m_dict['imc2'] = (self.call_imc2 if np.sum(self.seg) > 0 and
+                                       self.haralick_flag else self.return_0, ['imc2%s' % i for
+                                                                               i in img_id])
 
-        }
+        # self.m_dict = {
+        #     'centre of mass': (self.centre_of_mass, ['CoMx',
+        #                                              'CoMy',
+        #                                              'CoMz']),
+        #     'volume': (self.volume,
+        #                ['NVoxels', 'NVoxelsBinary', 'Vol', 'VolBinary']),
+        #     'max_dist_com': (self.max_dist_com, ['MaxDistCoM']),
+        #     'surface': (self.surface, ['NSurface',
+        #                                'NSurfaceBinary',
+        #                                'SurfaceVol',
+        #                                'SurfaceVolBinary']),
+        #     'surface volume ratio': (self.sav, ['SAVNumb',
+        #                                         'SAVNumBinary',
+        #                                         'SAV',
+        #                                         'SAVBinary']),
+        #     'compactness': (self.compactness, ['CompactNumb',
+        #                                        'CompactNumbBinary',
+        #                                        'Compactness',
+        #                                        'CompactnessBinary']),
+        #     'solidity': (self.solidity, ['Solidity']),
+        #     'balance': (self.balanced_rep, ['Balance']),
+        #     'fractal_dim': (self.fractal_dimension, ['Fractal_dim']),
+        #     'circularity': (self.circularity, ['Circularity']),
+        #     'contour_smoothness': (self.contour_smoothness, ['Contour_Smooth']),
+        #     'eigen_values': (self.ellipsoid_lambdas, ['lambda_%i' % i for i
+        #                                               in range(0,3)]),
+        #     'ratio_eigen': (self.ratio_eigen, ['ratio_eigen_%i' % i for i in
+        #                                        range(0,3)]),
+        #     'fa': (self.fractional_anisotropy, ['FA']),
+        #     'mean': (self.mean_, ['Mean_%s' % i for i in img_id]),
+        #     'weighted_mean': (self.weighted_mean_,
+        #                       ['Weighted_mean_%s' % i for i in img_id]),
+        #     'weighted_std': (self.weighted_std_, ['Weighted_std_%s' % i for i
+        #                                           in img_id]),
+        #     'median': (self.median_, ['Median_%s' % i for i in img_id]),
+        #     'skewness': (self.skewness_, ['Skewness_%s' % i for i in img_id]),
+        #     'kurtosis': (self.kurtosis_, ['Kurtosis_%s' % i for i in img_id]),
+        #     'min': (self.min_ if np.sum(self.seg) > 0 else
+        #             self.return_0, ['Min_%s' % i for i in img_id]),
+        #     'max': (self.max_ if np.sum(self.seg) > 0 else
+        #             self.return_0, ['Max_%s' % i for i in img_id]),
+        #     'quantile_1': (self.quantile_1 if np.sum(self.seg) > 0 else
+        #                    self.return_0, ['P1_%s' % i for i in img_id]),
+        #     'quantile_5': (self.quantile_5 if np.sum(self.seg) > 0 else
+        #                    self.return_0, ['P5_%s' % i for i in img_id]),
+        #     'quantile_25': (self.quantile_25 if np.sum(self.seg) > 0 else
+        #                     self.return_0, ['P25_%s' % i for i in img_id]),
+        #     'quantile_50': (self.median_ if np.sum(self.seg) > 0 else
+        #                     self.return_0, ['P50_%s' % i for i in img_id]),
+        #     'quantile_75': (self.quantile_75 if np.sum(self.seg) > 0 else
+        #                     self.return_0, ['P75_%s' % i for i in img_id]),
+        #     'quantile_95': (self.quantile_95 if np.sum(self.seg) > 0 else
+        #                     self.return_0, ['P95_%s' % i for i in img_id]),
+        #     'quantile_99': (self.quantile_99 if np.sum(self.seg) > 0 else
+        #                     self.return_0, ['P99_%s' % i for i in img_id]),
+        #
+        #     'wquantile_1': (self.weighted_quantile_1 if np.sum(self.seg) > 0
+        #                     else
+        #                    self.return_0, ['P1_%s' % i for i in img_id]),
+        #     'wquantile_5': (self.weighted_quantile_5 if np.sum(self.seg) > 0
+        #                     else
+        #                    self.return_0, ['P5_%s' % i for i in img_id]),
+        #     'wquantile_25': (self.weighted_quantile_25 if np.sum(self.seg) >
+        #                                                   0 else
+        #                     self.return_0, ['P25_%s' % i for i in img_id]),
+        #     'wquantile_50': (self.weighted_quantile_50 if np.sum(self.seg) > 0
+        #                     else
+        #                     self.return_0, ['P50_%s' % i for i in img_id]),
+        #     'wquantile_75': (self.weighted_quantile_75 if np.sum(self.seg) >
+        #                                                   0 else
+        #                     self.return_0, ['P75_%s' % i for i in img_id]),
+        #     'wquantile_95': (self.weighted_quantile_95 if np.sum(self.seg) >
+        #                                                   0 else
+        #                     self.return_0, ['P95_%s' % i for i in img_id]),
+        #     'wquantile_99': (self.weighted_quantile_99 if np.sum(self.seg) >
+        #                                                   0 else
+        #                     self.return_0, ['P99_%s' % i for i in img_id]),
+        #
+        #     'std': (self.std_ if np.sum(self.seg) > 0 else self.return_0,
+        #             ['STD_%s' % i for i in img_id]),
+        #     'asm': (self.call_asm if np.sum(self.seg) > 0 else self.return_0,
+        #             ['asm%s' % i for i in img_id]),
+        #
+        #     'contrast': (self.call_contrast if np.sum(self.seg) > 0 and
+        #                  self.haralick_flag else self.return_0,
+        #                  ['contrast%s' % i for i in img_id]),
+        #     'correlation': (self.call_correlation if np.sum(self.seg) > 0 and
+        #                     self.haralick_flag else self.return_0,
+        #                     ['correlation%s' % i for i in img_id]),
+        #     'sumsquare': (self.call_sum_square if np.sum(self.seg) > 0 and
+        #                   self.haralick_flag else self.return_0,
+        #                   ['sumsquare%s' % i for i in img_id]),
+        #     'sum_average': (self.call_sum_average if np.sum(self.seg) > 0 and
+        #                     self.haralick_flag else self.return_0,
+        #                     ['sum_average%s' % i for i in img_id]),
+        #     'idifferentmomment': (self.call_idifferent_moment if np.sum(
+        #         self.seg) > 0 and self.haralick_flag else self.return_0,
+        #                           ['idifferentmomment%s' % i for i in img_id]),
+        #     'sumentropy': (self.call_sum_entropy if np.sum(self.seg) > 0 and
+        #                    self.haralick_flag else self.return_0,
+        #                    ['sumentropy%s' % i for i in img_id]),
+        #     'entropy': (self.call_entropy if np.sum(self.seg) > 0 and
+        #                 self.haralick_flag else self.return_0,
+        #                 ['entropy%s' % i for i in img_id]),
+        #     'differencevariance': (self.call_difference_variance if
+        #                            np.sum(self.seg) > 0 and
+        #                            self.haralick_flag else self.return_0,
+        #                            ['differencevariance%s' % i for i in
+        #                             img_id]),
+        #     'differenceentropy': (self.call_difference_entropy if
+        #                           np.sum(self.seg) > 0 and self.haralick_flag
+        #                           else self.return_0,
+        #                           ['differenceentropy%s' % i for i in img_id]),
+        #     'sumvariance': (self.call_sum_variance if np.sum(self.seg) > 0 and
+        #                     self.haralick_flag else self.return_0,
+        #                     ['sumvariance%s' % i for i in img_id]),
+        #     'imc1': (self.call_imc1 if np.sum(self.seg) > 0 and
+        #              self.haralick_flag else self.return_0, ['imc1%s' % i for
+        #                                                      i in img_id]),
+        #     'imc2': (self.call_imc2 if np.sum(self.seg) > 0 and
+        #              self.haralick_flag else self.return_0, ['imc2%s' % i for
+        #                                                      i in img_id])
+        #
+        # }
 
     def __compute_mask(self):
         # TODO: check whether this works for probabilities type

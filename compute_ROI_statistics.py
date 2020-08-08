@@ -267,7 +267,7 @@ def main(argv):
             mask = nib.load(mask_file).get_data()
             if args.analysis == 'binary':
                 roi_stats, n, bins = extract_region_properties(
-                    image, mask, threshold=args.threshold, mul=args.mul,
+                    image_file, mask_file, threshold=args.threshold, mul=args.mul,
                     trans=args.trans, measures=argmeasures)
                 pth, name, ext = split_filename(mask)
                 fig_name = os.path.join(pth, '{}_{}_{}.png'.format(
@@ -324,7 +324,7 @@ def main(argv):
         for mask in masks:
             roi_stats, n, bins = extract_region_properties(
                 image, mask, threshold=args.threshold, mul=args.mul,
-                trans=args.trans)
+                trans=args.trans, measures=argmeasures)
             import matplotlib.pyplot as plt
             if np.sum(n) > 1:
                 print(bins)
