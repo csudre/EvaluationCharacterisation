@@ -12,6 +12,8 @@ from scipy.spatial import Delaunay as DL
 import scipy.ndimage.morphology as morph
 from .morphology import MorphologyOps
 from .pairwise_measures import CacheFunctionOutput
+from sklearn.metrics import pairwise_distances
+from sklearn.preprocessing import RobustScaler as RS
 # from niftynet.utilities.misc_common import MorphologyOps, CacheFunctionOutput
 LIST_HARALICK = ['asm', 'contrast', 'correlation', 'sumsquare',
                  'sum_average', 'idifferentmomment', 'sumentropy', 'entropy',
@@ -19,7 +21,8 @@ LIST_HARALICK = ['asm', 'contrast', 'correlation', 'sumsquare',
                  'imc1', 'imc2']
 LIST_SHAPE = ['centre of mass', 'volume', 'surface', 'ratio_eigen', 'fa',
               'solidity', 'compactness', 'contour_smoothness', 'circularity',
-              'balance', 'eigen_values', 'max_dist_com', 'fractal_dim']
+              'balance', 'eigen_values', 'max_dist_com', 'fractal_dim',
+              'eccentricity','compactness23','curvedness_si']
 LIST_HIST = ['weighted_mean', 'weighted_std', 'median', 'skewness',
              'kurtosis', 'wquantile_1', 'wquantile_5', 'wquantile_25',
              'wquantile_50', 'wquantile_75', 'wquantile_95', 'wquantile_99']
@@ -52,6 +55,17 @@ class RegionProperties(object):
 
         self.pixdim = pixdim
         self.threshold = threshold
+        rs = RS()
+        if 'curvedness_si' in measures:
+            self.rs_img = np.reshape(rs.fit_transform(np.reshape(self.img,[-1,1])),self.img.shape)
+            self.blurred = self.gaussian_blur()
+            
+        else:
+            self.rs_img = np.reshape(rs.fit_transform(np.reshape(self.img,[-1,1])),self.img.shape)
+            self.blurred = self.rs_img
+            
+
+
         if any(LIST_HARALICK) in measures or 'asm' in measures:
             self.haralick_flag = True
         else:
@@ -108,8 +122,12 @@ class RegionProperties(object):
                                                'CompactNumbBinary',
                                                'Compactness',
                                                'CompactnessBinary'])
+            if m == 'compactness23':
+                self.m_dict['compactness23'] = (self.compactness23, ['Compact2','Compact3'])
             if m == 'solidity':
                 self.m_dict['solidity'] = (self.solidity, ['Solidity'])
+            if m == 'curvedness_si':
+                self.m_dict['curvedness_si'] = (self.curvedness_si, ['ShapeIndex','Curvedness'])
             if m == 'balance':
                 self.m_dict['balance'] = (self.balanced_rep, ['Balance'])
             if m == 'fractal_dim':
@@ -124,6 +142,8 @@ class RegionProperties(object):
             if m == 'ratio_eigen':
                 self.m_dict['ratio_eigen'] = (self.ratio_eigen, ['ratio_eigen_%i' % i for i in
                                                range(0, 3)])
+            if m == 'eccentricity':
+                self.m_dict['eccentricity'] = (self.eccentricity_bord, ['Eccentricity'])
             if m == 'fa':
                 self.m_dict['fa'] = (self.fractional_anisotropy, ['FA'])
             if m == 'mean':
@@ -365,6 +385,43 @@ class RegionProperties(object):
         #                                                      i in img_id])
         #
         # }
+    def gaussian_blur(self):
+        blurred = ndimage.gaussian_filter(self.rs_img, 1)
+        return blurred
+                
+    def pc_ind(self, ind):
+        sub_sample = np.squeeze(self.blurred[ind[0]-2:ind[0]+3,ind[1]-2:ind[1]+3,ind[2]-2:ind[2]+3])
+        list_gradients_second = []
+        gradients_first = np.gradient(sub_sample)
+        for k in gradients_first:
+            list_gradients_second.append(np.gradient(k))
+        hessian_ind = np.zeros([3,3])
+        for f1 in range(0,3):
+            for f2 in range(0,3):
+                hessian_ind[f1,f2] = list_gradients_second[f1][f2][2,2,2]
+
+        S,_ = np.linalg.eig(hessian_ind)
+        return np.max(S),np.min(S)
+
+    def pc_based_measures(self, ind):
+        k1, k2 = self.pc_ind(ind)
+        print(k1, k2)
+        shaped_index = 2/np.pi * math.atan((k1+k2)/(k1-k2))
+        curvedness = np.sqrt(k1**2 + k2**2)
+        return shaped_index, curvedness
+    
+    def curvedness_si(self):
+        list_indices = np.asarray(np.where(self.bin_seg>0))
+        list_curvedness = []
+        list_si = []
+        for k in range(list_indices.shape[1]):
+            si, c = self.pc_based_measures(list_indices[:,k])
+            list_curvedness.append(c)
+            list_si.append(si)
+        return np.median(np.asarray(list_si)), np.median(np.asarray(list_curvedness))
+
+
+
 
     def __compute_mask(self):
         # TODO: check whether this works for probabilities type
@@ -407,6 +464,26 @@ class RegionProperties(object):
         min_ind = np.min(list_ind, 0)
         max_ind = np.max(list_ind, 0)
         return min_ind, max_ind
+    
+    def eccentricity_bord(self):
+        bord = RegionProperties.border_fromero(self.bin_seg)
+        list_ind = np.asarray(np.where(bord>0)).T
+        pw_dist = pairwise_distances(list_ind)
+        max_diam = np.max(pw_dist)
+        ind_max = np.where(pw_dist==max_diam)
+        diff =  list_ind[:, np.newaxis,:] - list_ind[np.newaxis, :,:]
+        test_vec = diff[ind_max[0][0],ind_max[1][0],:]
+        mult_mat = np.abs(np.sum(test_vec*diff,2))
+        mult_mat_new = mult_mat + np.eye(mult_mat.shape[0])*np.max(mult_mat)
+        list_poss = np.where(mult_mat_new == np.min(mult_mat_new))
+        min_diam = np.min(pw_dist[list_poss])
+        if min_diam == 0:
+            print('Warning Eccentricity not defined due to null denominator')
+            min_diam = 1
+        eccentricity = max_diam / min_diam
+        return eccentricity
+
+
 
     @CacheFunctionOutput
     def convexhull_fromles(self):
@@ -467,6 +544,14 @@ class RegionProperties(object):
     def ratio_eigen(self):
         s = self.ellipsoid_lambdas()
         return s[0]/s[1], s[0]/s[2], s[1]/s[2]
+    
+    def eccentricity(self):
+        s = self.ellipsoid_lambdas()
+        if s[2] == 0:
+            return s[0]
+        else:
+            return s[0]/s[2]
+            
 
     def fractional_anisotropy(self):
         s = self.ellipsoid_lambdas()
@@ -1063,6 +1148,26 @@ class RegionProperties(object):
         return np.power(surf_n, 1.5) / surf_n, np.power(surf_nb, 1.5) / \
             vol_nb, np.power(surf_v, 1.5) / vol_v, \
             np.power(surf_vb, 1.5) / vol_vb
+    
+    def compactness23(self):
+        """
+        Calculate compactness as volume / volume of bounding box (only binarised version)
+        """
+        _,_,_,v = self.volume()
+        dims = self.dims()
+        compact2 = v / np.prod(dims)
+        compact3 = v / np.max(dims)**3
+        return compact2, compact3
+
+    def dims(self):
+        """
+        Calculate extent of dimensions
+        """
+        inds = np.asarray(np.where(self.bin_seg>0))
+        maxs = np.max(inds,1)
+        mins = np.min(inds,1)
+        extent = maxs - mins +1
+        return extent
 
     def min_(self):
         """

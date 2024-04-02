@@ -34,7 +34,7 @@ MEASURES_SHAPE = ('centre of mass', 'volume', 'surface', 'surface volume '
                                                          'ratio',
                   'compactness', 'solidity', 'balance', 'fractal_dim',
                   'circularity', 'contour_smoothness', 'eigen_values',
-                  'ratio_eigen', 'fa')
+                  'ratio_eigen', 'fa','eccentricity','curvedness_si','compactness23')
 
 OUTPUT_FORMAT = '{:4f}'
 OUTPUT_FILE_PREFIX = 'ROIStatistics'
@@ -144,7 +144,7 @@ def main(argv):
               '-trans <offset>   ')
         sys.exit(2)
 
-    print(args.input_image, args.mask_image, args.trans, args.mul,
+    print('Variables ',args.input_image, args.mask_image, args.trans, args.mul,
           args.threshold)
     images = glob.glob(args.input_image)
     masks = glob.glob(args.mask_image)
@@ -183,7 +183,7 @@ def main(argv):
     if args.trans is None:
         args.trans = 50
     print(args.threshold, args.mul, args.trans)
-    img = nib.load(images[0]).get_data()
+    img = nib.load(images[0]).get_fdata()
     img_2 = np.nan_to_num(expand_to_5d(img))
     if len(args.measures) == 1 and args.measures[0] == 'simple':
         argmeasures = MEASURES_SIMPLE
@@ -204,10 +204,10 @@ def main(argv):
         mask_names_init = glob.glob(args.mask_image)
         for mask_file in mask_names_init:
             mask_nii = nib.load(mask_file)
-            mask = mask_nii.get_data()
+            mask = mask_nii.get_fdata()
             mask = (mask>args.threshold)
             if args.cc_file is not None:
-                cc_map = nib.load(args.cc_file).get_data()
+                cc_map = nib.load(args.cc_file).get_fdata()
             else:
                 # cc_map = measure.label(mask, connectivity=args.neighborhood,
                 #                background=0)
@@ -263,8 +263,8 @@ def main(argv):
         for pair in pair_list:
             image_file = pair[0]
             mask_file = pair[1]
-            image = nib.load(image_file).get_data()
-            mask = nib.load(mask_file).get_data()
+            image = nib.load(image_file).get_fdata()
+            mask = nib.load(mask_file).get_fdata()
             if args.analysis == 'binary':
                 roi_stats, n, bins = extract_region_properties(
                     image_file, mask_file, threshold=args.threshold, mul=args.mul,
@@ -302,8 +302,22 @@ def main(argv):
                         OUTPUT_FORMAT) + '\n')
             if args.analysis == 'cc':
 
-                cc_map = measure.label(mask, connectivity=args.neighborhood,
-                                       background=0)
+                # cc_map = measure.label(mask, connectivity=args.neighborhood,
+                #                        background=0)
+                if args.cc_file is not None:
+                    cc_map = nib.load(args.cc_file).get_fdata()
+                else:
+                # cc_map = measure.label(mask, connectivity=args.neighborhood,
+                #                background=0)
+                    cc_map, n_lab = label(mask)
+
+                    nii_cc = nib.Nifti1Image(cc_map.astype(float), nib.load(mask_file).affine)
+                    nib.save(nii_cc, os.path.join(pth,
+                                          'CC_'+os.path.split(mask_file)[1]
+                                              .rstrip(
+                                              '.nii.gz')+'_'+str(
+                                              args.threshold)+'.nii.gz'))
+                # cc_map, n_lab = label(mask)
                 values_label = np.unique(cc_map)
                 values_label = [v for v in values_label if v > 0]
                 for val in values_label:
@@ -344,7 +358,7 @@ def main(argv):
     out_stream.close()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+     main(sys.argv[1:])
 
 
 
